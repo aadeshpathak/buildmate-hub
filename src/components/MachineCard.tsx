@@ -15,80 +15,140 @@ const MachineCard = ({ machine, index, onBook }: Props) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 40, scale: 0.9 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="glass-card overflow-hidden group"
+      transition={{
+        duration: 0.6,
+        delay: index * 0.1,
+        type: "spring",
+        stiffness: 100
+      }}
+      whileHover={{
+        y: -8,
+        transition: { duration: 0.3, ease: "easeOut" }
+      }}
+      className="glass-card overflow-hidden group cursor-pointer border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 h-full"
     >
-      <div className="relative overflow-hidden h-52">
-        <img
+      <div className="relative overflow-hidden h-48 sm:h-56 md:h-64 lg:h-72 xl:h-80 2xl:h-64 group">
+        {/* Premium image with enhanced effects */}
+        <motion.img
           src={machine.image}
           alt={machine.name}
           loading="lazy"
           width={800}
           height={600}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+          whileHover={{ scale: 1.1 }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
 
-        <button
-          onClick={() => setLiked(!liked)}
-          className="absolute top-3 right-3 p-2 rounded-full glass"
-        >
-          <Heart className={`h-4 w-4 transition-colors ${liked ? "fill-primary text-primary" : "text-foreground"}`} />
-        </button>
+        {/* Multi-layer overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        <div className="absolute top-3 left-3">
+        {/* Premium shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
+        {/* Enhanced status badge */}
+        <div className="absolute top-4 left-4">
           {machine.available ? (
-            <span className="px-3 py-1 rounded-full bg-success/20 text-success text-xs font-semibold">
-              Available
-            </span>
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-green-500/90 to-emerald-500/90 text-white text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm"
+            >
+              ✓ Available Now
+            </motion.span>
           ) : (
-            <span className="px-3 py-1 rounded-full bg-destructive/20 text-destructive text-xs font-semibold">
-              Booked
-            </span>
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-red-500/90 to-red-600/90 text-white text-xs font-bold shadow-lg border border-white/20 backdrop-blur-sm"
+            >
+              ⏳ Currently Booked
+            </motion.span>
           )}
+        </div>
+
+        {/* Premium like button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setLiked(!liked)}
+          className="absolute top-4 right-4 p-3 rounded-full glass-card border border-white/20 shadow-xl hover:shadow-primary/20 transition-all duration-300"
+        >
+          <Heart className={`h-5 w-5 transition-all duration-300 ${
+            liked
+              ? "fill-red-500 text-red-500 drop-shadow-lg"
+              : "text-white/80 hover:text-white"
+          }`} />
+        </motion.button>
+
+        {/* Premium overlay text */}
+        <div className="absolute bottom-4 left-4 right-4">
+          <div className="flex items-center justify-between">
+            <span className="text-white font-bold text-lg drop-shadow-lg">
+              {machine.name.split(' ')[0]}
+            </span>
+            <span className="text-white/90 text-sm font-medium drop-shadow-md">
+              {machine.category}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="p-5">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold text-foreground text-base leading-tight">{machine.name}</h3>
-          <div className="flex items-center gap-1 shrink-0 ml-2">
-            <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-            <span className="text-sm font-medium text-foreground">{machine.rating}</span>
-            <span className="text-xs text-muted-foreground">({machine.reviews})</span>
+      <div className="p-4 sm:p-5 md:p-6 lg:p-7 xl:p-8 flex flex-col h-full">
+        <div className="flex items-start justify-between mb-2 md:mb-3 lg:mb-4 xl:mb-5">
+          <h3 className="font-semibold text-foreground text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl leading-tight flex-1 pr-2">{machine.name}</h3>
+          <div className="flex items-center gap-1 shrink-0">
+            <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6 fill-primary text-primary" />
+            <span className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-medium text-foreground">{machine.rating}</span>
+            <span className="text-xs sm:text-sm md:text-sm lg:text-base xl:text-lg text-muted-foreground">({machine.reviews})</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-muted-foreground mb-4">
-          <MapPin className="h-3.5 w-3.5" />
-          <span className="text-xs">{machine.location}</span>
+        <div className="flex items-center gap-1 text-muted-foreground mb-3 sm:mb-4 md:mb-5 lg:mb-6 xl:mb-7">
+          <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 xl:h-6 xl:w-6" />
+          <span className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">{machine.location}</span>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 xl:gap-4 mb-3 sm:mb-4 md:mb-5 lg:mb-6 xl:mb-7">
           {Object.entries(machine.specs).slice(0, 3).map(([key, val]) => (
-            <span key={key} className="px-2 py-1 rounded-md bg-secondary text-xs text-secondary-foreground">
+            <span key={key} className="px-1.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 py-0.5 sm:py-1 md:py-1.5 lg:py-2 xl:py-2.5 rounded-md bg-secondary text-xs sm:text-sm md:text-sm lg:text-base xl:text-lg text-secondary-foreground">
               {key}: {val}
             </span>
           ))}
         </div>
 
-        <div className="flex items-end justify-between pt-3 border-t border-border">
-          <div>
-            <span className="text-xl font-bold text-primary">₹{machine.pricePerHour.toLocaleString()}</span>
-            <span className="text-xs text-muted-foreground">/hr</span>
-            <div className="text-xs text-muted-foreground">₹{machine.pricePerDay.toLocaleString()}/day</div>
+        <div className="flex items-end justify-between pt-3 sm:pt-4 md:pt-5 lg:pt-6 xl:pt-8 border-t border-primary/10 bg-gradient-to-r from-primary/5 to-transparent px-4 sm:px-6 md:px-5 lg:px-6 xl:px-8 pb-4 sm:pb-6 md:pb-5 lg:pb-6 xl:pb-8 mt-auto">
+          <div className="space-y-0.5 sm:space-y-1 md:space-y-1.5 lg:space-y-2 xl:space-y-3">
+            <div className="flex items-baseline gap-1 sm:gap-2 md:gap-2 lg:gap-3 xl:gap-4">
+              <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-gradient">₹{machine.pricePerHour.toLocaleString()}</span>
+              <span className="text-xs sm:text-sm md:text-sm lg:text-base xl:text-lg text-muted-foreground font-medium">per hour</span>
+            </div>
+            <div className="flex items-baseline gap-1 sm:gap-2 md:gap-2 lg:gap-3 xl:gap-4">
+              <span className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-primary/80">₹{machine.pricePerDay.toLocaleString()}</span>
+              <span className="text-xs sm:text-sm md:text-sm lg:text-base xl:text-lg text-muted-foreground">per day</span>
+            </div>
           </div>
-          <Button
-            size="sm"
-            disabled={!machine.available}
-            onClick={() => onBook(machine)}
-            className="bg-primary text-primary-foreground hover:bg-jcb-yellow-dark font-semibold"
+
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            Book Now
-          </Button>
+            <Button
+              size="sm"
+              disabled={!machine.available}
+              onClick={() => onBook(machine)}
+              className={`font-bold px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-2 sm:py-3 md:py-3 lg:py-4 xl:py-5 rounded-xl transition-all duration-300 shadow-lg text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl ${
+                machine.available
+                  ? 'bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-white glow-primary hover:shadow-primary/25'
+                  : 'bg-muted text-muted-foreground cursor-not-allowed'
+              }`}
+            >
+              {machine.available ? 'Book Now' : 'Unavailable'}
+            </Button>
+          </motion.div>
         </div>
       </div>
     </motion.div>

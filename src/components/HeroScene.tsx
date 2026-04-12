@@ -1,73 +1,69 @@
-import { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshDistortMaterial } from "@react-three/drei";
+import { useRef, useMemo } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float, MeshDistortMaterial, Sphere, Box, Torus, Environment, ContactShadows, Text } from "@react-three/drei";
 import * as THREE from "three";
 
-function GlowingSphere() {
-  const meshRef = useRef<THREE.Mesh>(null);
+function Minimal3DSphere() {
+  const sphereRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
+    if (sphereRef.current) {
+      sphereRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+      sphereRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.15) * 0.05;
     }
   });
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-      <mesh ref={meshRef} scale={2.2}>
-        <icosahedronGeometry args={[1, 4]} />
+    <Float speed={1.2} rotationIntensity={0.2} floatIntensity={0.6}>
+      <mesh ref={sphereRef} position={[2, 0, -1]} scale={1.8}>
+        <sphereGeometry args={[1, 24, 24]} />
         <MeshDistortMaterial
-          color="#FFC107"
-          roughness={0.2}
+          color="#FFD700"
+          roughness={0.3}
           metalness={0.8}
-          distort={0.3}
-          speed={2}
+          distort={0.1}
+          speed={0.8}
           transparent
-          opacity={0.6}
+          opacity={0.7}
         />
       </mesh>
     </Float>
   );
 }
 
-function Particles() {
-  const particlesRef = useRef<THREE.Points>(null);
-  const count = 200;
-  const positions = new Float32Array(count * 3);
 
-  for (let i = 0; i < count * 3; i++) {
-    positions[i] = (Math.random() - 0.5) * 15;
-  }
-
-  useFrame((state) => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y = state.clock.elapsedTime * 0.02;
-    }
-  });
-
-  return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial size={0.03} color="#FFC107" transparent opacity={0.6} sizeAttenuation />
-    </points>
-  );
-}
 
 const HeroScene = () => {
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
-      <Canvas camera={{ position: [0, 0, 6], fov: 60 }} dpr={[1, 1.5]}>
-        <ambientLight intensity={0.3} />
-        <pointLight position={[5, 5, 5]} intensity={1} color="#FFC107" />
-        <pointLight position={[-5, -5, 5]} intensity={0.5} color="#FF8F00" />
-        <GlowingSphere />
-        <Particles />
+      <Canvas
+        camera={{ position: [0, 0, 6], fov: 60 }}
+        dpr={[1, 1.5]}
+        gl={{
+          antialias: true,
+          alpha: true
+        }}
+      >
+        {/* Minimal lighting setup */}
+        <ambientLight intensity={0.4} color="#FFFFFF" />
+        <directionalLight
+          position={[3, 3, 3]}
+          intensity={0.8}
+          color="#FFD700"
+        />
+        <pointLight position={[-2, -2, 2]} intensity={0.3} color="#FFA500" />
+
+        {/* Minimal 3D element */}
+        <Minimal3DSphere />
+
+        {/* Subtle ground shadows */}
+        <ContactShadows
+          position={[0, -2, 0]}
+          opacity={0.2}
+          scale={8}
+          blur={1}
+          far={3}
+        />
       </Canvas>
     </div>
   );

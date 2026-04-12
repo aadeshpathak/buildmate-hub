@@ -1,29 +1,63 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MachineCard from "./MachineCard";
 import BookingModal from "./BookingModal";
-import { machines, type Machine } from "@/data/machines";
+import { useMobileCarousel } from "@/hooks/useCarousel";
+import { useMachines } from "@/hooks/useMachines";
+import { type Machine } from "@/data/machines";
 
-const filters = ["All", "Available", "Excavator", "Crane", "Bulldozer", "Mixer"];
+const filters = ["All", "SLCM", "Batching Plants", "Transit Mixers", "Concrete Pumps"];
 
 const MachinesSection = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [localSearch, setLocalSearch] = useState(search);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
+
+  const { machines, loading, error } = useMachines();
+
+  // Update local search when prop changes
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
+  // Debounced search update - only update after user stops typing
+  const handleSearchChange = useCallback((value: string) => {
+    setLocalSearch(value);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearch(value);
+    }, 1000); // Increased to 1000ms for better performance
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const filtered = machines.filter((m) => {
     const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase());
     const matchesFilter =
       activeFilter === "All" ||
-      (activeFilter === "Available" && m.available) ||
-      m.name.toLowerCase().includes(activeFilter.toLowerCase());
-    return matchesSearch && matchesFilter;
+      m.category === activeFilter;
+    return matchesSearch && matchesFilter && m.available;
   });
+
+  const carousel = useMobileCarousel(filtered.length);
 
   return (
     <section id="machines" className="section-padding relative" ref={ref}>
@@ -50,8 +84,21 @@ const MachinesSection = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search machines..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={localSearch}
+              onChange={(e) => {
+                e.preventDefault();
+                handleSearchChange(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  // Submit immediately on Enter
+                  if (searchTimeoutRef.current) {
+                    clearTimeout(searchTimeoutRef.current);
+                  }
+                  setSearch(localSearch);
+                }
+              }}
               className="pl-10 bg-secondary border-border h-12"
             />
           </div>
@@ -77,16 +124,86 @@ const MachinesSection = () => {
           ))}
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((machine, i) => (
-            <MachineCard key={machine.id} machine={machine} index={i} onBook={setSelectedMachine} />
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
-            No machines found matching your search.
+        {loading && (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading machines...</p>
           </div>
+        )}
+
+        {error && (
+          <div className="text-center py-16 text-destructive">
+            <p>Failed to load machines. Please try again later.</p>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
+            {/* Mobile Carousel */}
+            <div className="block md:hidden relative">
+              <div
+                ref={carousel.containerRef}
+                className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide gap-4 pb-4"
+                style={{ scrollBehavior: 'smooth' }}
+              >
+                {filtered.slice(0, 5).map((machine, i) => (
+                  <div key={machine.id} className="flex-none w-80 snap-center">
+                    <MachineCard machine={machine} index={i} onBook={setSelectedMachine} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Carousel Navigation */}
+              {filtered.length > 1 && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10"
+                    onClick={carousel.goToPrev}
+                    disabled={!carousel.canGoPrev}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10"
+                    onClick={carousel.goToNext}
+                    disabled={!carousel.canGoNext}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+
+                  {/* Dots Indicator */}
+                  <div className="flex justify-center gap-2 mt-4">
+                    {filtered.map((_, i) => (
+                      <button
+                        key={i}
+                        className={`w-2 h-2 rounded-full transition-colors ${
+                          i === carousel.activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                        }`}
+                        onClick={() => carousel.scrollToIndex(i)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Desktop Grid */}
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8 xl:gap-10">
+              {filtered.slice(0, 10).map((machine, i) => (
+                <MachineCard key={machine.id} machine={machine} index={i} onBook={setSelectedMachine} />
+              ))}
+            </div>
+
+            {filtered.length === 0 && (
+              <div className="text-center py-16 text-muted-foreground">
+                No machines found matching your search.
+              </div>
+            )}
+          </>
         )}
 
         <BookingModal machine={selectedMachine} onClose={() => setSelectedMachine(null)} />
