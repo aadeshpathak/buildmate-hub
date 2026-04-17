@@ -47,12 +47,12 @@ const HeroSection = () => {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative"
           >
-            {/* Premium glass morphism badge */}
+            {/* Premium glass morphism badge - Hidden on mobile */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8"
+              className="hidden md:inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8"
             >
               <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse shadow-lg" />
               <span className="text-sm font-semibold text-white drop-shadow-lg">500+ Machines Ready to Deploy</span>
