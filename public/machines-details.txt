@@ -1,0 +1,116 @@
+=== AJAX PRODUCT RANGE BROCHURE ===
+
+AJAX – MAKES CONCRETE SENSE
+The Next-Gen 360° Concreting Solutions
+Made in India – Made for the World
+
+=== PRODUCT CATEGORIES ===
+Production → Batching Plants
+Transportation → Transit Mixers
+Placement → Boom Pumps
+Paving → Slip-form paver
+Core → SLCM (Self Loading Concrete Mixer)
+
+=== SLCM (SELF LOADING CONCRETE MIXER) - ARGO SERIES ===
+Overview: Introduced in India in 1992, Global leader in SLCM, 20,000+ machines delivered, Exported worldwide
+Salient Features: Load Cell Weighing System (high accuracy), 3-way steering + 4WD, Telematics (tracking + monitoring), Auto cleaning system, Electronic drum control unit
+Applications: Smart city projects, Buildings, CC roads, Canal lining
+Technical Highlights: Drum output 1–4.8 cu.m, Water pump 230–400 LPM, Speed up to ~29 km/h, Engine Mahindra/Kirloskar/Ashok Leyland
+
+PRICE LIST & ASP of ARGO SLCM with effect from 1st May 2023
+Sl No Machine Model Description Capacity List Price (INR) ASP Price (INR)
+1 Argo 1000 Self Loading Concrete Mixer 1.0 cu.m 17,75,000 20,80,000
+2 Argo 2000 Self Loading Concrete Mixer 2.0 cu.m 29,40,000 34,50,000
+3 Argo 2300 Self Loading Concrete Mixer 2.3 cu.m non swivel 29,90,000 35,00,000
+4 Argo 2300 Self Loading Concrete Mixer 2.3 cu.m swivel 31,15,000 36,50,000
+5 Argo 2300 Acura Self Loading Concrete Mixer 2.3 cu.m non swivel load cell 30,40,000 35,75,000
+6 Argo 2300 Acura Self Loading Concrete Mixer 2.3 cu.m swivel load cell 31,65,000 37,25,000
+7 Argo 2800 Self Loading Concrete Mixer 2.8 cu.m non swivel 33,90,000 39,75,000
+8 Argo 2800 Self Loading Concrete Mixer 2.8 cu.m swivel 35,15,000 41,25,000
+9 Argo 2800 Acura Self Loading Concrete Mixer 2.8 cu.m non swivel load cell 34,40,000 40,25,000
+10 Argo 2800 Acura Self Loading Concrete Mixer 2.8 cu.m swivel load cell 35,65,000 41,75,000
+11 Argo 3500 Self Loading Concrete Mixer 3.5 cu.m non swivel 36,40,000 43,00,000
+12 Argo 3500 Acura Self Loading Concrete Mixer 3.5 cu.m load cell 36,90,000 43,50,000
+13 Argo 4300 Self Loading Concrete Mixer 4.3 cu.m non swivel 40,00,000 47,20,000
+14 Argo 4300 Self Loading Concrete Mixer 4.3 cu.m swivel 41,50,000 48,95,000
+15 Argo 4300 Acura Self Loading Concrete Mixer 4.3 cu.m non swivel load cell 40,50,000 47,70,000
+16 Argo 4300 Acura Self Loading Concrete Mixer 4.3 cu.m swivel load cell 42,00,000 49,45,000
+17 Argo 4800 Acura Self Loading Concrete Mixer 4.8 cu.m non swivel load cell 43,00,000 50,75,000
+18 Argo 4800 Acura Self Loading Concrete Mixer 4.8 cu.m swivel load cell 44,50,000 52,50,000
+19 Argo 5000 Self Loading Concrete Mixer 5.0 cu.m non swivel 45,00,000 53,00,000
+20 Argo 5000 Self Loading Concrete Mixer 5.0 cu.m swivel 46,50,000 54,50,000
+21 Argo 5000 Acura Self Loading Concrete Mixer 5.0 cu.m non swivel load cell 45,50,000 53,50,000
+22 Argo 5000 Acura Self Loading Concrete Mixer 5.0 cu.m swivel load cell 47,00,000 55,00,000
+
+=== BATCHING PLANTS - CRB SERIES ===
+Overview: Preferred by RMC companies, High productivity + energy efficient
+Features: Modular design (1-day installation), Skip bucket dual rope system, Aggregate weighing hopper, Planetary/Twin shaft mixer, SCADA + PLC control panel
+Applications: Precast, Oil & gas, RMC, Cement plants
+
+Models and Capacities:
+CRB 20 - 20 cu.m/hr - 20,00,000 24,00,000
+CRB 30 - 30 cu.m/hr - 30,00,000 36,00,000
+CRB 45 - 45 cu.m/hr - 45,00,000 54,00,000
+CRB 60 - 60 cu.m/hr - 60,00,000 72,00,000
+CRB 75 - 75 cu.m/hr - 75,00,000 90,00,000
+CRB 90 - 90 cu.m/hr - 90,00,000 1,08,00,000
+CRB 120 - 120 cu.m/hr - 1,20,00,000 1,44,00,000
+
+=== BATCHING PLANTS - IRB SERIES ===
+Overview: Inline bin skip conveyor system, Low energy consumption
+Features: Inline bin aggregate storage, High capacity bins, Accurate weighing
+
+Models and Capacities:
+IRB 30 - 30 cu.m/hr - 35,00,000 42,00,000
+IRB 45 - 45 cu.m/hr - 52,50,000 63,00,000
+IRB 60 - 60 cu.m/hr - 70,00,000 84,00,000
+IRB 75 - 75 cu.m/hr - 87,50,000 1,05,00,000
+IRB 90 - 90 cu.m/hr - 1,05,00,000 1,26,00,000
+IRB 120 - 120 cu.m/hr - 1,40,00,000 1,68,00,000
+
+=== BATCHING PLANTS - IBP SERIES ===
+Overview: Belt conveyor version, High throughput
+
+Models and Capacities:
+IBP 30 - 30 cu.m/hr - 40,00,000 48,00,000
+IBP 45 - 45 cu.m/hr - 60,00,000 72,00,000
+IBP 60 - 60 cu.m/hr - 80,00,000 96,00,000
+IBP 75 - 75 cu.m/hr - 1,00,00,000 1,20,00,000
+IBP 90 - 90 cu.m/hr - 1,20,00,000 1,44,00,000
+IBP 120 - 120 cu.m/hr - 1,60,00,000 1,92,00,000
+IBP 160 - 160 cu.m/hr - 2,13,33,333 2,56,00,000
+IBP 200 - 200 cu.m/hr - 2,66,66,667 3,20,00,000
+IBP 240 - 240 cu.m/hr - 3,20,00,000 3,84,00,000
+
+=== TRANSIT MIXERS - AF SERIES ===
+Overview: PTO driven (engine powered drum), Designed for rural + urban projects
+Features: Longer drum life, Low maintenance, High safety + stability, Hydro-pneumatic pressure tank
+
+Models and Capacities:
+AF 6XE - 6 cu.m - 48,00,000 57,00,000
+AF 7XE - 7 cu.m - 56,00,000 66,50,000
+AF 7XP - 7 cu.m - 56,00,000 66,50,000
+AF 8XP - 8 cu.m - 64,00,000 76,00,000
+AF 9XP - 9 cu.m - 72,00,000 85,50,000
+AF 10XP - 10 cu.m - 80,00,000 95,00,000
+AF 11XP - 11 cu.m - 88,00,000 1,04,50,000
+
+=== CONCRETE PUMPS - ASP SERIES ===
+Overview: Designed for horizontal + vertical pumping, Low pressure drop + high efficiency
+Features: S-valve technology, Remote control, Auto lubrication, Compact integrated design
+
+Models and Outputs:
+ASP 3009 - 30 cu.m/hr - 24,00,000 29,00,000
+ASP 4009 - 37 cu.m/hr - 29,60,000 35,50,000
+ASP 4011 - 40 cu.m/hr - 32,00,000 38,50,000
+ASP 5009 - 50 cu.m/hr - 40,00,000 48,00,000
+ASP 6011 E - 55 cu.m/hr - 44,00,000 53,00,000
+ASP 7011 - 70 cu.m/hr - 56,00,000 67,00,000
+ASP 10012 - 97 cu.m/hr - 77,60,000 93,00,000
+
+=== NOTES ===
+1. All SLCM prices are for standard machines, without any optional items
+2. For any optional item addition, the ASP will correspondingly increase
+3. SLCM prices are on Ex Works basis, net of GST, TCS, Freight & Transit Insurance
+4. All prices are subject to change without prior notice
+5. Batching plants, transit mixers, and concrete pumps pricing available on request

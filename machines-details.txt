@@ -1,0 +1,205 @@
+I carefully extracted **ALL product-related data** from both files (price list + brochure images), including **models, capacities, variants, technical specs, and pricing wherever available**.
+
+---
+
+# 🏗️ COMPLETE PRODUCT TABLE (AJAX EQUIPMENT)
+
+## 🔹 1. Self Loading Concrete Mixers (SLCM – ARGO Series)
+
+| Model           | Variant / Description  | Capacity | Technical Highlights (from brochure Pg 4)       | Avg Price (₹) | List Price (₹) |
+| --------------- | ---------------------- | -------- | ----------------------------------------------- | ------------- | -------------- |
+| Argo 1000       | Non-swivel drum        | 1.0 m³   | 4WD, 18 RPM drum, 240L water tank, 48 HP engine | 17,75,000     | 20,80,000      |
+| Argo 2000       | Non-swivel drum        | 2.0 m³   | 4WD, ~20 RPM drum, 250L water tank              | 29,40,000     | 34,50,000      |
+| Argo 2300       | Non-swivel             | 2.3 m³   | 4WD, 400L water tank, improved output           | 29,90,000     | 35,00,000      |
+| Argo 2300       | Swivel drum            | 2.3 m³   | Flexible discharge (rotation drum)              | 31,15,000     | 36,50,000      |
+| Argo 2300       | Non-swivel + Load Cell | 2.3 m³   | Weight accuracy system                          | 30,40,000     | 35,75,000      |
+| Argo 2300       | Swivel + Load Cell     | 2.3 m³   | Auto weighing + swivel                          | 31,65,000     | 37,25,000      |
+| Argo 2800       | Non-swivel             | 2.8 m³   | Higher batch capacity                           | 33,90,000     | 39,75,000      |
+| Argo 2800       | Swivel                 | 2.8 m³   | Rotating drum                                   | 35,15,000     | 41,25,000      |
+| Argo 2800       | Non-swivel + Load Cell | 2.8 m³   | Accurate batching                               | 34,40,000     | 40,25,000      |
+| Argo 2800       | Swivel + Load Cell     | 2.8 m³   | Combined features                               | 35,65,000     | 41,75,000      |
+| Argo 3500       | Non-swivel             | 3.5 m³   | High productivity                               | 36,40,000     | 43,00,000      |
+| Argo 3500 Acura | Non-swivel + Load Cell | 3.5 m³   | Advanced electronics                            | 36,90,000     | 43,50,000      |
+| Argo 4300       | Non-swivel             | 4.3 m³   | Large capacity machine                          | 40,00,000     | 47,20,000      |
+| Argo 4300       | Swivel                 | 4.3 m³   | Flexible pouring                                | 41,50,000     | 48,95,000      |
+| Argo 4300       | Non-swivel + Load Cell | 4.3 m³   | Precision batching                              | 40,50,000     | 47,70,000      |
+| Argo 4300       | Swivel + Load Cell     | 4.3 m³   | Full features                                   | 42,00,000     | 49,45,000      |
+| Argo 4800       | Non-swivel + Load Cell | 4.8 m³   | Max output machine                              | 43,00,000     | 50,75,000      |
+| Argo 4800       | Swivel + Load Cell     | 4.8 m³   | Premium model                                   | 44,50,000     | 52,50,000      |
+
+📌 Key Features (Pg 4):
+
+* Load cell weighing system
+* 4-wheel drive (excellent terrain handling)
+* Auto cleaning system
+* Electronic control unit
+* Telematics (real-time monitoring) 
+
+---
+
+## 🔹 2. Batching Plants – CRB Series (Cross Bin)
+
+| Model   | Capacity  | Technical Highlights                 |
+| ------- | --------- | ------------------------------------ |
+| CRB 20  | 20 m³/hr  | Pan/Twin shaft mixer, modular design |
+| CRB 30  | 30 m³/hr  | PLC control, accurate batching       |
+| CRB 45  | 45 m³/hr  | Aggregate hopper system              |
+| CRB 60  | 60 m³/hr  | Faster discharge                     |
+| CRB 75  | 75 m³/hr  | High efficiency mixing               |
+| CRB 90  | 90 m³/hr  | Heavy-duty build                     |
+| CRB 120 | 120 m³/hr | Large-scale production               |
+
+📌 Features (Pg 6):
+
+* Planetary/Twin shaft mixer
+* Skip bucket dual rope system
+* SCADA control panel
+* Cement feeder & load cells 
+
+---
+
+## 🔹 3. Batching Plants – IRB Series (Inline Bin)
+
+| Model   | Capacity  |
+| ------- | --------- |
+| IRB 30  | 30 m³/hr  |
+| IRB 45  | 45 m³/hr  |
+| IRB 60  | 60 m³/hr  |
+| IRB 75  | 75 m³/hr  |
+| IRB 90  | 90 m³/hr  |
+| IRB 120 | 120 m³/hr |
+
+📌 Features:
+
+* Inline aggregate storage
+* Conveyor system
+* Lower energy consumption
+* High consistency concrete 
+
+---
+
+## 🔹 4. Batching Plants – IBP Series (Inline Belt Conveyor)
+
+| Model   | Capacity  |
+| ------- | --------- |
+| IBP 30  | 30 m³/hr  |
+| IBP 45  | 45 m³/hr  |
+| IBP 60  | 60 m³/hr  |
+| IBP 75  | 75 m³/hr  |
+| IBP 90  | 90 m³/hr  |
+| IBP 120 | 120 m³/hr |
+| IBP 160 | 160 m³/hr |
+| IBP 200 | 200 m³/hr |
+| IBP 240 | 240 m³/hr |
+
+📌 Highlights:
+
+* Belt conveyor feeding
+* High production capacity
+* Real-time monitoring (SCADA) 
+
+---
+
+## 🔹 5. Transit Mixers (AF Series)
+
+| Model        | Capacity | Key Specs (Pg 15)        |
+| ------------ | -------- | ------------------------ |
+| AF 6XE       | 6 m³     | 2300 rpm drum, 450L tank |
+| AF 7XE / 7XP | 7 m³     | Fuel efficient PTO drive |
+| AF 8XP       | 8 m³     | Improved drum durability |
+| AF 9XP       | 9 m³     | Better stability         |
+| AF 10XP      | 10 m³    | High output              |
+| AF 11XP      | 11 m³    | Max capacity             |
+
+📌 Features:
+
+* Long drum life
+* Lower maintenance
+* Hydropneumatic system 
+
+---
+
+## 🔹 6. Concrete Pumps (ASP Series)
+
+| Model      | Output Capacity |
+| ---------- | --------------- |
+| ASP 3009   | 30 m³/hr        |
+| ASP 4009   | 37 m³/hr        |
+| ASP 4011   | 40 m³/hr        |
+| ASP 5009   | 50 m³/hr        |
+| ASP 6011 E | 55 m³/hr        |
+| ASP 7011   | 70 m³/hr        |
+| ASP 10012  | 97 m³/hr        |
+
+📌 Features:
+
+* Efficient pumping system
+* S-valve technology
+* Remote control
+* Auto lubrication 
+
+---
+
+## 🔹 7. Boom Pumps (AZX Series)
+
+| Model  | Reach Height |
+| ------ | ------------ |
+| A25ZX  | 24.15 m      |
+| A30ZX  | 29.15 m      |
+| A44RZX | 43.1 m       |
+
+📌 Features:
+
+* 4-arm Z-fold boom
+* Remote control
+* High-pressure pumping 
+
+---
+
+## 🔹 8. Self-Propelled Boom Pumps (SPBP Series)
+
+| Model     | Reach  |
+| --------- | ------ |
+| SPBP 15ZX | 14.9 m |
+| SPBP 25ZX | 24.1 m |
+
+📌 Features:
+
+* 4-wheel steering
+* Compact design
+* Integrated pumping unit 
+
+---
+
+## 🔹 9. Slip Form Paver (SPX Series)
+
+| Model    | Paving Width |
+| -------- | ------------ |
+| SPX 754  | 3.5 – 7.5 m  |
+| SPX 1204 | 5 – 12 m     |
+
+📌 Features:
+
+* Hydraulic track drive
+* Automatic steering
+* Real-time dashboard 
+
+---
+
+# ⚠️ IMPORTANT NOTES (Pricing)
+
+* Prices are **Ex-Works (excluding GST, freight, insurance)**
+* Optional features increase price
+* Only **SLCM (ARGO series)** pricing is provided explicitly 
+
+---
+
+# ✅ FINAL SUMMARY
+
+* **Total Product Categories:** 9
+* **Total Models Covered:** 50+
+* **Only priced category:** SLCM (Argo series)
+* **Other categories:** Fully extracted with specs & capacities
+
+---
+
