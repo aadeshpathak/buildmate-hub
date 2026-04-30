@@ -19,12 +19,12 @@ function Minimal3DSphere() {
         <sphereGeometry args={[1, 24, 24]} />
         <MeshDistortMaterial
           color="#FFD700"
-          roughness={0.3}
-          metalness={0.8}
-          distort={0.1}
-          speed={0.8}
+          roughness={0.1}
+          metalness={0.9}
+          distort={0.05}
+          speed={0.3}
           transparent
-          opacity={0.7}
+          opacity={0.8}
         />
       </mesh>
     </Float>
@@ -44,25 +44,49 @@ const HeroScene = () => {
           alpha: true
         }}
       >
-        {/* Minimal lighting setup */}
-        <ambientLight intensity={0.4} color="#FFFFFF" />
+        {/* Professional 3-point lighting setup */}
+        {/* Key Light - Main illumination */}
         <directionalLight
           position={[3, 3, 3]}
-          intensity={0.8}
+          intensity={1.2}
           color="#FFD700"
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-far={50}
+          shadow-camera-left={-10}
+          shadow-camera-right={10}
+          shadow-camera-top={10}
+          shadow-camera-bottom={-10}
         />
-        <pointLight position={[-2, -2, 2]} intensity={0.3} color="#FFA500" />
+
+        {/* Fill Light - Soft illumination */}
+        <directionalLight
+          position={[-2, 2, 2]}
+          intensity={0.4}
+          color="#FFA500"
+        />
+
+        {/* Rim Light - Edge definition */}
+        <directionalLight
+          position={[0, -3, -2]}
+          intensity={0.6}
+          color="#FFFFFF"
+        />
+
+        {/* Ambient Light - Overall illumination */}
+        <ambientLight intensity={0.2} color="#FFFFFF" />
 
         {/* Minimal 3D element */}
         <Minimal3DSphere />
 
-        {/* Subtle ground shadows */}
+        {/* Realistic ground shadows */}
         <ContactShadows
           position={[0, -2, 0]}
-          opacity={0.2}
-          scale={8}
-          blur={1}
-          far={3}
+          opacity={0.4}
+          scale={12}
+          blur={2.5}
+          far={4.5}
         />
       </Canvas>
     </div>
