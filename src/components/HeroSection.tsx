@@ -25,15 +25,20 @@ const PremiumPageLoader = ({ onComplete }: { onComplete: () => void }) => {
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
-      z-index: 999999 !important;
+      z-index: 1000000 !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       opacity: 1 !important;
       backdrop-filter: blur(8px) !important;
+      pointer-events: all !important;
+      margin: 0 !important;
+      padding: 0 !important;
     `;
 
     // Create premium content
@@ -241,6 +246,42 @@ const PremiumPageLoader = ({ onComplete }: { onComplete: () => void }) => {
     `;
     document.head.appendChild(css);
 
+    // Define scroll prevention functions
+    const preventScroll = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    const preventKeys = (e: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', 'Space'].includes(e.code)) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    // Prevent body scrolling when loader is active
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+    document.body.style.position = 'fixed';
+    document.body.style.top = '0';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.bottom = '0';
+    document.body.style.width = '100%';
+    document.documentElement.style.overflow = 'hidden';
+
+    // Add scroll prevention event listeners as backup
+    document.addEventListener('wheel', preventScroll, { passive: false });
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('keydown', preventKeys);
+
+    console.log('Body scroll prevention applied:', {
+      bodyOverflow: document.body.style.overflow,
+      bodyHeight: document.body.style.height,
+      htmlOverflow: document.documentElement.style.overflow
+    });
+
     // Force append and ensure visibility
     document.body.appendChild(loader);
     console.log('✨ PREMIUM LOADER: Elegant loader displayed');
@@ -271,6 +312,25 @@ const PremiumPageLoader = ({ onComplete }: { onComplete: () => void }) => {
 
     return () => {
       clearTimeout(timer);
+
+      // Restore body scrolling completely
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.bottom = '';
+      document.body.style.width = '';
+      document.documentElement.style.overflow = '';
+
+      // Remove scroll prevention event listeners
+      document.removeEventListener('wheel', preventScroll);
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('keydown', preventKeys);
+
+      console.log('Body scroll restored and event listeners removed');
+
       if (document.body.contains(loader)) {
         document.body.removeChild(loader);
       }
