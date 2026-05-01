@@ -20,22 +20,11 @@ export const useMachines = (searchTerm?: string, category?: string) => {
         machineData = await getMachines();
       }
 
-      // Simulate progressive loading by adding machines one by one with delay
+      // Load all machines at once for better performance
       if (machineData.length > 0) {
-        setMachines([]);
-        setLoadedCount(0);
-        setHasMore(true);
-
-        for (let i = 0; i < machineData.length; i++) {
-          await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay between each machine
-
-          setMachines(prev => [...prev, machineData[i]]);
-          setLoadedCount(i + 1);
-
-          if (i === machineData.length - 1) {
-            setHasMore(false);
-          }
-        }
+        setMachines(machineData);
+        setLoadedCount(machineData.length);
+        setHasMore(false);
       } else {
         setMachines([]);
         setLoadedCount(0);

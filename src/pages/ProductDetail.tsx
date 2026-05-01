@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Heart, Share, Star, MapPin, ShoppingCart, MessageCircle, AlertCircle, Calendar, Clock, Shield, CheckCircle } from "lucide-react";
@@ -8,101 +8,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMachine } from "@/hooks/useMachine";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Optimized Animation Configurations for Ultra-Smooth Experience
-const ultraSmoothAnimations = {
-  // Header animations
-  headerEnter: {
-    y: -80,
-    opacity: 0
-  },
-  headerAnimate: {
-    y: 0,
-    opacity: 1
-  },
-
-  // Content sections
-  sectionLeft: {
+// Clean minimal animations
+const smoothAnimations = {
+  fadeIn: {
     opacity: 0,
-    x: -60,
-    scale: 0.95
+    y: 20
   },
-  sectionRight: {
-    opacity: 0,
-    x: 60,
-    scale: 0.95
-  },
-  sectionCenter: {
-    opacity: 0,
-    y: 40,
-    scale: 0.98
-  },
-  sectionAnimate: {
+  fadeInVisible: {
     opacity: 1,
-    x: 0,
-    y: 0,
-    scale: 1
+    y: 0
   },
-
-  // Interactive elements
-  buttonHover: {
-    scale: 1.05,
-    y: -2
-  },
-  buttonTap: {
-    scale: 0.95,
-    y: 1
-  },
-
-  // List items with stagger
-  listItem: (index: number) => ({
-    opacity: 0,
-    y: 20,
-    scale: 0.9
-  }),
-  listItemAnimate: {
-    opacity: 1,
-    y: 0,
-    scale: 1
+  scaleHover: {
+    scale: 1.02
   }
 };
 
-// Ultra-smooth transitions optimized for performance
-const ultraSmoothTransitions = {
-  header: {
-    type: "spring",
-    stiffness: 300,
-    damping: 35,
-    mass: 0.8,
-    duration: 0.6
+const smoothTransitions = {
+  default: {
+    type: "tween",
+    duration: 0.3,
+    ease: "easeOut"
   },
-  section: {
-    type: "spring",
-    stiffness: 250,
-    damping: 30,
-    mass: 1,
-    duration: 0.8
-  },
-  fast: {
-    type: "spring",
-    stiffness: 400,
-    damping: 35,
-    mass: 0.6,
-    duration: 0.3
-  },
-  // Custom easing for buttery smooth experience
-  buttery: {
+  slow: {
     type: "tween",
     duration: 0.5,
-    ease: [0.25, 0.46, 0.45, 0.94] // Custom cubic-bezier for ultra-smooth
-  },
-  stagger: (index: number) => ({
-    type: "spring",
-    stiffness: 350,
-    damping: 40,
-    mass: 0.7,
-    duration: 0.4,
-    delay: index * 0.08
-  })
+    ease: "easeOut"
+  }
 };
 
 const ProductDetail = () => {
@@ -110,6 +41,30 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isWishlisted, setIsWishlisted] = useState(false);
+
+  // Load wishlist from localStorage
+  useEffect(() => {
+    const savedWishlist = localStorage.getItem('buildmate_wishlist');
+    if (savedWishlist) {
+      const wishlist = JSON.parse(savedWishlist);
+      setIsWishlisted(wishlist.includes(id));
+    }
+  }, [id]);
+
+  // Toggle wishlist
+  const toggleWishlist = () => {
+    const savedWishlist = localStorage.getItem('buildmate_wishlist');
+    let wishlist = savedWishlist ? JSON.parse(savedWishlist) : [];
+
+    if (isWishlisted) {
+      wishlist = wishlist.filter(machineId => machineId !== id);
+    } else {
+      wishlist.push(id);
+    }
+
+    localStorage.setItem('buildmate_wishlist', JSON.stringify(wishlist));
+    setIsWishlisted(!isWishlisted);
+  };
 
   const { machine, loading, error } = useMachine(id);
 
@@ -144,400 +99,238 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-background via-background to-card/20 ${isMobile ? 'overflow-x-hidden' : ''}`}>
-      {/* Ultra-Smooth Header */}
-      <motion.div
-        initial={ultraSmoothAnimations.headerEnter}
-        animate={ultraSmoothAnimations.headerAnimate}
-        transition={ultraSmoothTransitions.header}
-        className={`sticky top-0 z-50 glass-card border-b border-border/50 will-change-transform ${isMobile ? 'safe-area-inset-top' : ''}`}
-        style={{
-          ...isMobile ? { paddingTop: 'env(safe-area-inset-top)' } : {},
-          backfaceVisibility: 'hidden',
-          perspective: 1000
-        }}
-      >
+    <div className="min-h-screen bg-[#0B0C10] relative overflow-hidden">
+      {/* Subtle radial gradients for depth */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
+      </div>
+      {/* Clean Header */}
+      <header className={`sticky top-0 z-40 backdrop-blur-xl bg-white/3 border-b border-white/10 ${isMobile ? 'safe-area-inset-top' : ''}`}>
         <div className={`max-w-7xl mx-auto ${isMobile ? 'px-4 py-4' : 'px-6 py-4'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={ultraSmoothAnimations.buttonHover}
-                whileTap={ultraSmoothAnimations.buttonTap}
-                transition={ultraSmoothTransitions.fast}
+              <button
                 onClick={() => navigate('/dashboard')}
-                className="p-3 bg-white/10 rounded-2xl hover:bg-white/20 transition-all duration-300 will-change-transform"
-                style={{ backfaceVisibility: 'hidden' }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-foreground" />
-              </motion.button>
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
               <div>
-                <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold text-gradient`}>{machine.name}</h1>
-                <p className="text-muted-foreground text-sm">{machine.category}</p>
+                <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold text-white`}>{machine.name}</h1>
+                <p className="text-gray-500 text-sm">{machine.category}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={ultraSmoothAnimations.buttonHover}
-                whileTap={ultraSmoothAnimations.buttonTap}
-                transition={ultraSmoothTransitions.fast}
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className={`p-3 rounded-2xl transition-all duration-300 will-change-transform ${
-                  isWishlisted
-                    ? 'bg-red-500/20 text-red-400'
-                    : 'bg-white/10 text-white hover:bg-white/20'
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleWishlist}
+                className={`p-2 rounded-lg transition-colors ${
+                  isWishlisted ? 'text-red-400 hover:bg-red-500/10' : 'text-gray-400 hover:bg-gray-700/50'
                 }`}
-                style={{ backfaceVisibility: 'hidden' }}
               >
                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-              </motion.button>
-
-              <motion.button
-                whileHover={ultraSmoothAnimations.buttonHover}
-                whileTap={ultraSmoothAnimations.buttonTap}
-                transition={ultraSmoothTransitions.fast}
-                className="p-3 bg-white/10 rounded-2xl hover:bg-white/20 transition-all duration-300 will-change-transform"
-                style={{ backfaceVisibility: 'hidden' }}
-              >
-                <Share className="w-5 h-5 text-foreground" />
-              </motion.button>
+              </button>
+              <button className="p-2 text-gray-400 hover:bg-gray-700/50 rounded-lg transition-colors">
+                <Share className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
-      </motion.div>
+      </header>
 
-      <div className={`max-w-7xl mx-auto ${isMobile ? 'px-4 py-6 pb-24' : 'px-6 py-8'}`}>
-        <div className={`grid grid-cols-1 ${isMobile ? 'gap-8' : 'lg:grid-cols-2 gap-12'}`}>
-          {/* Ultra-Smooth Image Gallery */}
+      <div className={`max-w-7xl mx-auto ${isMobile ? 'px-4 py-6 pb-32' : 'px-6 py-8'}`}>
+        <div className={`grid grid-cols-1 ${isMobile ? 'gap-6' : 'lg:grid-cols-2 gap-12'}`}>
+          {/* Product Image */}
           <motion.div
-            initial={ultraSmoothAnimations.sectionLeft}
-            animate={ultraSmoothAnimations.sectionAnimate}
-            transition={{ ...ultraSmoothTransitions.section, delay: 0.2 }}
-            className="space-y-4 will-change-transform"
-            style={{
-              backfaceVisibility: 'hidden',
-              perspective: 1000
-            }}
+            initial={smoothAnimations.fadeIn}
+            animate={smoothAnimations.fadeInVisible}
+            transition={smoothTransitions.default}
+            className="space-y-4"
           >
-            {/* Main Image */}
-            <div className="relative group">
-              <motion.div
-                className={`rounded-3xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 shadow-2xl ${isMobile ? 'aspect-[4/3]' : 'aspect-square'}`}
-                whileHover={{ scale: isMobile ? 1 : 1.02 }}
-                transition={{ duration: 0.3 }}
-              >
-                <img
-                  src={machine.image}
-                  alt={machine.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-6 left-6">
-                  <Badge className="bg-emerald-500/90 text-white border-0 px-4 py-2 text-sm font-semibold">
-                    ✓ Available Now
-                  </Badge>
-                </div>
-              </motion.div>
-            </div>
+             <div className="relative">
+               <div className={`rounded-2xl overflow-hidden bg-gray-100 ${isMobile ? 'aspect-[4/3]' : 'aspect-square'}`}>
+                 <motion.img
+                   layoutId={machine.id}
+                   src={machine.image}
+                   alt={machine.name}
+                   className="w-full h-full object-cover"
+                   transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+                 />
+               </div>
+               {machine.available && (
+                 <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                   Available
+                 </div>
+               )}
+             </div>
           </motion.div>
 
-          {/* Ultra-Smooth Product Information */}
+          {/* Product Information */}
           <motion.div
-            initial={ultraSmoothAnimations.sectionRight}
-            animate={ultraSmoothAnimations.sectionAnimate}
-            transition={{ ...ultraSmoothTransitions.section, delay: 0.4 }}
-            className="space-y-6 will-change-transform"
-            style={{
-              backfaceVisibility: 'hidden',
-              perspective: 1000
-            }}
+            initial={smoothAnimations.fadeIn}
+            animate={smoothAnimations.fadeInVisible}
+            transition={{ ...smoothTransitions.default, delay: 0.1 }}
+            className="bg-white/3 backdrop-blur-xl rounded-2xl p-6 border border-white/10 space-y-6"
           >
-            {/* Product Title & Rating */}
+            {/* Basic Info */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Badge className="bg-slate-700 text-slate-300 border-slate-600">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="flex items-center gap-2"
+              >
+                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
                   {machine.category}
-                </Badge>
-                <Badge className={`border-0 ${machine.available ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'}`}>
-                  {machine.available ? 'Available' : 'Booked'}
-                </Badge>
-              </div>
-
-              <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl lg:text-4xl'} font-bold text-white mb-2 leading-tight`}>
-                {machine.name}
-              </h1>
-
-              {/* Rating & Reviews */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${i < Math.floor(machine.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-600'}`}
-                    />
-                  ))}
-                  <span className="text-white font-semibold ml-2">{machine.rating}</span>
-                </div>
-                <span className="text-slate-400">({machine.reviews} reviews)</span>
-                <span className="text-slate-500">•</span>
-                <span className="text-slate-400 flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  {machine.location}
                 </span>
-              </div>
+              </motion.div>
 
-              <p className={`text-slate-300 leading-relaxed ${isMobile ? 'text-base' : 'text-lg'}`}>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-semibold text-white leading-tight`}
+              >
+                {machine.name}
+              </motion.h1>
+
+              {/* Rating & Location */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="flex items-center gap-4 text-sm text-gray-400"
+              >
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="font-medium">{machine.rating}</span>
+                  <span>({machine.reviews} reviews)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{machine.location}</span>
+                </div>
+              </motion.div>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="text-gray-300 leading-relaxed font-normal"
+              >
                 {machine.description}
-              </p>
+              </motion.p>
             </div>
 
-            {/* Tabs */}
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 border border-white/10">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">Overview</TabsTrigger>
-                <TabsTrigger value="specs" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">Specs</TabsTrigger>
-                <TabsTrigger value="reviews" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">Reviews</TabsTrigger>
-                <TabsTrigger value="booking" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">Booking</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-6 mt-6">
-                {/* Pricing & Quick Actions */}
-                <div className={`bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-2xl rounded-3xl border border-white/10 ${isMobile ? 'p-4' : 'p-6'}`}>
-                  {/* Price Header */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <p className="text-slate-400 text-sm mb-1">Daily Rental Rate</p>
-                      <div className="flex items-baseline gap-2">
-                        <p className={`font-bold text-yellow-400 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-                          ₹{machine.pricePerDay.toLocaleString()}
-                        </p>
-                        <p className="text-slate-400 text-sm">per day</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-emerald-400 text-sm font-medium">⚡ Instant Booking</p>
-                      <p className="text-slate-400 text-xs">Available 24/7</p>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setIsWishlisted(!isWishlisted)}
-                        className={`flex items-center justify-center gap-2 py-4 px-4 rounded-2xl font-semibold transition-all duration-300 ${
-                          isWishlisted
-                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                            : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
-                        }`}
-                      >
-                        <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-                        {isWishlisted ? 'Wishlisted' : 'Wishlist'}
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex items-center justify-center gap-2 py-4 px-4 bg-slate-700 text-white rounded-2xl font-semibold hover:bg-slate-600 transition-colors"
-                      >
-                        <Share className="w-5 h-5" />
-                        Share
-                      </motion.button>
-                    </div>
-
-                    <motion.div
-                      whileHover={!isMobile ? ultraSmoothAnimations.buttonHover : undefined}
-                      whileTap={ultraSmoothAnimations.buttonTap}
-                      transition={ultraSmoothTransitions.fast}
-                      className="will-change-transform"
-                      style={{ backfaceVisibility: 'hidden' }}
-                    >
-                      <Button
-                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300"
-                        disabled={!machine.available}
-                      >
-                        <ShoppingCart className="w-5 h-5 mr-2" />
-                        {machine.available ? 'Book Equipment Now' : 'Currently Unavailable'}
-                      </Button>
-                    </motion.div>
-
-                    <motion.div
-                      whileHover={!isMobile ? ultraSmoothAnimations.buttonHover : undefined}
-                      whileTap={ultraSmoothAnimations.buttonTap}
-                      transition={ultraSmoothTransitions.fast}
-                      className="will-change-transform"
-                      style={{ backfaceVisibility: 'hidden' }}
-                    >
-                      <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 py-4 rounded-2xl">
-                        <MessageCircle className="w-5 h-5 mr-2" />
-                        Contact Owner
-                      </Button>
-                    </motion.div>
-
-                    <div className="text-center space-y-2 pt-4 border-t border-white/10">
-                      <p className="text-slate-400 text-sm">
-                        ⚡ Instant confirmation • 📞 24/7 Support • 🔒 Secure booking
-                      </p>
-                      <p className="text-slate-500 text-xs">
-                        Free delivery within 24 hours • AJAX certified equipment
-                      </p>
-                    </div>
+            {/* Pricing */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="bg-white/3 backdrop-blur-xl rounded-xl p-6 border border-white/10"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-gray-400 text-sm font-normal">Daily Rental Rate</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-semibold text-yellow-400">
+                      ₹{machine.pricePerDay.toLocaleString()}
+                    </p>
+                    <p className="text-gray-400 text-sm font-normal">per day</p>
                   </div>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="specs" className="space-y-6 mt-6">
-                <div className={`bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-2xl rounded-3xl border border-white/10 ${isMobile ? 'p-4' : 'p-6'}`}>
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-emerald-400" />
-                    Technical Specifications
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(machine.specs).map(([key, value]) => (
-                      <div key={key} className="flex justify-between items-center py-3 px-4 bg-slate-800/50 rounded-xl border border-white/5">
-                        <span className="text-slate-400 font-medium">{key}</span>
-                        <span className="text-white font-semibold">{value}</span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="text-right">
+                  <p className="text-green-400 text-sm font-normal">✓ Available</p>
+                  <p className="text-gray-400 text-xs font-normal">Instant booking</p>
                 </div>
-              </TabsContent>
+              </div>
 
-              <TabsContent value="reviews" className="space-y-6 mt-6">
-                <div className={`bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-2xl rounded-3xl border border-white/10 ${isMobile ? 'p-4' : 'p-6'}`}>
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-400" />
-                    Customer Reviews
-                  </h3>
-                  <div className="space-y-4">
-                    {/* Placeholder reviews - in a real app, these would come from Firebase */}
-                    <div className="border-b border-white/10 pb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">RK</span>
-                          </div>
-                          <span className="text-white font-medium">Rajesh Kumar</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-slate-300 text-sm">Excellent machine, delivered on time and in perfect condition. Highly recommend for construction projects.</p>
-                      <p className="text-slate-500 text-xs mt-2">2 weeks ago</p>
-                    </div>
-                    <div className="border-b border-white/10 pb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">AS</span>
-                          </div>
-                          <span className="text-white font-medium">Anjali Sharma</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[...Array(4)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                          ))}
-                          <Star className="w-4 h-4 text-slate-600" />
-                        </div>
-                      </div>
-                      <p className="text-slate-300 text-sm">Good performance overall. The booking process was smooth and support was responsive.</p>
-                      <p className="text-slate-500 text-xs mt-2">1 month ago</p>
-                    </div>
-                  </div>
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={toggleWishlist}
+                    className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+                      isWishlisted
+                        ? 'bg-red-50 text-red-600 border border-red-200'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                    {isWishlisted ? 'Wishlisted' : 'Wishlist'}
+                  </button>
+
+                  <button className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+                    <Share className="w-5 h-5" />
+                    Share
+                  </button>
                 </div>
-              </TabsContent>
 
-              <TabsContent value="booking" className="space-y-6 mt-6">
-                <div className={`bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-2xl rounded-3xl border border-white/10 ${isMobile ? 'p-4' : 'p-6'}`}>
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-emerald-400" />
-                    Book This Equipment
-                  </h3>
+                <button
+                  className="w-full bg-yellow-400 text-black font-bold py-4 rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!machine.available}
+                >
+                  {machine.available ? 'Book Equipment Now' : 'Currently Unavailable'}
+                </button>
 
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-slate-400 text-sm font-medium">Start Date</label>
-                        <input
-                          type="date"
-                          className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-emerald-400 focus:outline-none"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-slate-400 text-sm font-medium">End Date</label>
-                        <input
-                          type="date"
-                          className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-emerald-400 focus:outline-none"
-                        />
-                      </div>
-                    </div>
+                <button className="w-full border border-gray-600 text-gray-300 py-3 rounded-lg font-medium hover:bg-gray-700/50 hover:text-white hover:border-gray-500 transition-colors">
+                  Contact Owner
+                </button>
+              </div>
+            </motion.div>
 
-                    <div className="space-y-2">
-                      <label className="text-slate-400 text-sm font-medium">Project Type</label>
-                      <select className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-emerald-400 focus:outline-none">
-                        <option value="">Select project type</option>
-                        <option value="construction">Construction</option>
-                        <option value="mining">Mining</option>
-                        <option value="demolition">Demolition</option>
-                        <option value="infrastructure">Infrastructure</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
+            {/* Technical Specifications */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="bg-white/3 backdrop-blur-xl rounded-xl p-6 border border-white/10 space-y-4"
+            >
+              <h3 className="text-lg font-semibold text-white">Technical Specifications</h3>
+              <div className="grid grid-cols-1 gap-3">
+                {Object.entries(machine.specs).slice(0, 6).map(([key, value], index) => (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.9 + index * 0.1 }}
+                    className="flex justify-between items-center py-2 px-3 bg-gray-700/30 rounded-lg border border-gray-600/50"
+                  >
+                    <span className="text-gray-300 font-normal">{key}</span>
+                    <span className="text-gray-100 font-normal">{value}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
 
-                    <div className="space-y-2">
-                      <label className="text-slate-400 text-sm font-medium">Additional Requirements</label>
-                      <textarea
-                        placeholder="Any special requirements or instructions..."
-                        rows={3}
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-xl text-white focus:border-emerald-400 focus:outline-none resize-none"
-                      />
-                    </div>
-
-                    <div className="bg-slate-800/30 rounded-xl p-4 border border-white/5">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-slate-400">Daily Rate</span>
-                        <span className="text-white font-semibold">₹{machine.pricePerDay.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-slate-400">Duration</span>
-                        <span className="text-white font-semibold">7 days</span>
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                        <span className="text-white font-bold">Total</span>
-                        <span className="text-emerald-400 font-bold">₹{(machine.pricePerDay * 7).toLocaleString()}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-sm text-slate-400">
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
-                      <span>Free delivery within 24 hours</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-slate-400">
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
-                      <span>24/7 technical support included</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-slate-400">
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
-                      <span>Full insurance coverage</span>
-                    </div>
-
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="pt-4">
-                      <Button
-                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300"
-                        disabled={!machine.available}
-                      >
-                        <ShoppingCart className="w-5 h-5 mr-2" />
-                        {machine.available ? 'Confirm Booking' : 'Currently Unavailable'}
-                      </Button>
-                    </motion.div>
-                  </div>
+            {/* Features */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+              className="bg-white/3 backdrop-blur-xl rounded-xl p-6 border border-white/10 space-y-3"
+            >
+              <h3 className="text-lg font-semibold text-white">Features</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Free delivery within 24 hours</span>
                 </div>
-              </TabsContent>
-            </Tabs>
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>24/7 technical support included</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Full insurance coverage</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>AJAX certified equipment</span>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

@@ -88,29 +88,8 @@ export async function getMachinesByCategory(categoryId: string): Promise<Machine
   try {
     let categoryFilter: string;
 
-    // Map UI category IDs to actual category names
-    switch (categoryId) {
-      case 'slcm':
-        categoryFilter = 'SLCM Mixers';
-        break;
-      case 'batching':
-        categoryFilter = 'Batching Plants';
-        break;
-      case 'transit':
-        categoryFilter = 'Transit Mixers';
-        break;
-      case 'pumps':
-        categoryFilter = 'Concrete Pumps';
-        break;
-      case 'boom-pumps':
-        categoryFilter = 'Boom Pumps';
-        break;
-      case 'pavers':
-        categoryFilter = 'Slip Form Pavers';
-        break;
-      default:
-        return [];
-    }
+    // For flexible filtering, we'll use the categoryId as-is and do smart matching
+    categoryFilter = categoryId;
 
     // First get all machines, then filter client-side to avoid Firestore index issues
     const machinesRef = collection(db, 'machines');
@@ -125,7 +104,39 @@ export async function getMachinesByCategory(categoryId: string): Promise<Machine
     })) as Machine[];
 
     // Client-side filtering by category
-    return allMachines.filter(machine => machine.category === categoryFilter);
+    // Very flexible filtering that tries multiple matching strategies
+    const result = allMachines.filter(machine => {
+      const machineCategory = machine.category.toLowerCase();
+      const filterCategory = categoryId.toLowerCase();
+
+      // Exact match (case insensitive)
+      if (machineCategory === filterCategory) return true;
+
+      // Partial match - if either contains the other
+      if (machineCategory.includes(filterCategory) || filterCategory.includes(machineCategory)) return true;
+
+      // Special batching plants logic
+      if (filterCategory.includes('batch') && (
+        machineCategory.includes('batch') ||
+        machineCategory.includes('crb') ||
+        machineCategory.includes('irb') ||
+        machineCategory.includes('ibp')
+      )) return true;
+
+      // Special concrete mixers logic
+      if ((filterCategory.includes('slcm') || filterCategory.includes('mixer')) &&
+          (machineCategory.includes('slcm') || machineCategory.includes('mixer'))) return true;
+
+      // Special transit mixers logic
+      if (filterCategory.includes('transit') && machineCategory.includes('transit')) return true;
+
+      // Special concrete pumps logic
+      if (filterCategory.includes('pump') && machineCategory.includes('pump')) return true;
+
+      return false;
+    });
+
+    return result;
   } catch (error) {
     console.error('Error fetching machines by category:', error);
     return [];
