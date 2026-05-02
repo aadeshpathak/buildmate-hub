@@ -175,10 +175,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Prathamesh Tiwari**
 
-- Portfolio: [https://www.self.so/prathamesh-surendra-tiwari-resume](https://www.self.so/prathamesh-surendra-tiwari-resume)
-- Email: [Your email here]
+- Portfolio: [click to open](https://www.self.so/prathamesh-surendra-tiwari-resume)
+- Email: [prathameshtwrofficial@gmai.com]
 
-Project Link: [https://github.com/prathameshtwrofficial/buildmate-hub](https://github.com/prathameshtwrofficial/buildmate-hub)
+Project Link: [visit link](https://github.com/prathameshtwrofficial/buildmate-hub)
 
 ## Acknowledgments
 
@@ -188,5 +188,5 @@ Project Link: [https://github.com/prathameshtwrofficial/buildmate-hub](https://g
 
 ---
 
-_Made by Prathamesh Tiwari_</content>
+_Made with ❤️ by Prathamesh Tiwari_</content>
 <parameter name="filePath">README.md
