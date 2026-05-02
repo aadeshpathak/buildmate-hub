@@ -92,38 +92,61 @@ const MachinesSection = () => {
     };
   }, []);
 
-  const filtered = machines.filter((m) => {
-    // Search filtering (if search is empty, matchesSearch is true)
-    const matchesSearch = search.trim() === "" || m.name.toLowerCase().includes(search.toLowerCase());
+  const filtered = (() => {
+    // First, filter by search and basic criteria
+    const searchFiltered = machines.filter((m) => {
+      const matchesSearch = search.trim() === "" || m.name.toLowerCase().includes(search.toLowerCase());
+      return matchesSearch && m.available;
+    });
 
-    // Category filtering
-    let matchesFilter = false;
-    const machineCategory = (m.category || "").toLowerCase().trim();
-
+    // Then apply category filtering with limits
     if (activeFilter === "All") {
-      matchesFilter = true;
-    } else if (activeFilter === "SLCM") {
-      matchesFilter = machineCategory === "slcm";
-    } else if (activeFilter === "Batching Plants") {
-      matchesFilter = machineCategory === "crb" || machineCategory === "irb" || machineCategory === "ibp";
-    } else if (activeFilter === "Transit Mixers") {
-      matchesFilter = machineCategory === "af";
-    } else if (activeFilter === "Concrete Pumps") {
-      matchesFilter = machineCategory === "asp";
-    }
+      // Group by category and take 5 from each
+      const categoryGroups: { [key: string]: typeof searchFiltered } = {};
+      searchFiltered.forEach(machine => {
+        const category = machine.category || "Unknown";
+        if (!categoryGroups[category]) {
+          categoryGroups[category] = [];
+        }
+        categoryGroups[category].push(machine);
+      });
 
-    // Debug logging
-    if (activeFilter !== "All" && !matchesFilter) {
-      console.log(`Machine ${m.name} category: "${m.category}" -> "${machineCategory}" does not match filter "${activeFilter}"`);
-    }
+      // Take 5 from each category
+      const result: typeof searchFiltered = [];
+      Object.values(categoryGroups).forEach(group => {
+        result.push(...group.slice(0, 5));
+      });
+      return result;
+    } else {
+      // Filter by specific category and take only 5
+      const categoryFiltered = searchFiltered.filter((m) => {
+        const machineCategory = (m.category || "").toLowerCase().trim();
+        if (activeFilter === "SLCM") {
+          return machineCategory === "slcm mixers";
+        } else if (activeFilter === "Batching Plants") {
+          return machineCategory.includes("batching plants");
+        } else if (activeFilter === "Transit Mixers") {
+          return machineCategory === "transit mixers";
+        } else if (activeFilter === "Concrete Pumps") {
+          return machineCategory === "concrete pumps";
+        }
+        return false;
+      });
 
-    return matchesSearch && matchesFilter && m.available;
-  });
+      // Debug logging
+      if (activeFilter !== "All") {
+        console.log(`Category "${activeFilter}": ${categoryFiltered.length} machines found`);
+      }
+
+      return categoryFiltered.slice(0, 5);
+    }
+  })();
 
   // Debug: Log current filter and search
   console.log('Active filter:', activeFilter, 'Search:', search, 'Filtered count:', filtered.length);
 
-  const carousel = useMobileCarousel(filtered.length);
+  const carouselItems = filtered.length > 5 ? Math.max(1, filtered.length - 4) : 1;
+  const carousel = useMobileCarousel(carouselItems);
 
   return (
     <section id="machines" className="section-padding relative" ref={ref}>
@@ -210,15 +233,25 @@ const MachinesSection = () => {
         {!loading && !error && (
           <>
             {/* Mobile Carousel */}
-            <div className="block md:hidden relative">
+            <div className="block md:hidden relative overflow-hidden">
               <div
                 ref={carousel.containerRef}
-                className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide gap-4 pb-4"
-                style={{ scrollBehavior: 'smooth' }}
+                className="flex transition-transform duration-300 ease-out"
+                style={{
+                  transform: carousel.transform,
+                  width: `${carousel.totalWidth}px`
+                }}
               >
-                {filtered.slice(0, 5).map((machine, i) => (
-                  <div key={machine.id} className="flex-none w-80 snap-center">
-                    <MachineCard machine={machine} index={i} onBook={setSelectedMachine} />
+                {filtered.slice(carousel.activeIndex, carousel.activeIndex + 5).map((machine, i) => (
+                  <div
+                    key={machine.id}
+                    className="flex-none"
+                    style={{
+                      width: `${Math.min(280, (carousel.containerRef.current?.clientWidth || 320) - 32)}px`,
+                      marginRight: '16px'
+                    }}
+                  >
+                    <MachineCard machine={machine} index={carousel.activeIndex + i} onBook={setSelectedMachine} />
                   </div>
                 ))}
               </div>
@@ -246,17 +279,19 @@ const MachinesSection = () => {
                   </Button>
 
                   {/* Dots Indicator */}
-                  <div className="flex justify-center gap-2 mt-4">
-                    {filtered.map((_, i) => (
-                      <button
-                        key={i}
-                        className={`w-2 h-2 rounded-full transition-colors ${
-                          i === carousel.activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'
-                        }`}
-                        onClick={() => carousel.scrollToIndex(i)}
-                      />
-                    ))}
-                  </div>
+                  {carouselItems > 1 && (
+                    <div className="flex justify-center gap-2 mt-4">
+                      {Array.from({ length: carouselItems }, (_, i) => (
+                        <button
+                          key={i}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            i === carousel.activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                          }`}
+                          onClick={() => carousel.scrollToIndex(i)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
             </div>

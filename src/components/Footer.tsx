@@ -1,6 +1,10 @@
 import { Flame } from "lucide-react";
 
 const Footer = () => {
+  const handleEquipmentClick = (filter: string) => {
+    // Navigate to the page with filter and scroll to machines section
+    window.location.href = `/?filter=${filter}#machines`;
+  };
   return (
     <footer className="border-t border-border py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -18,18 +22,27 @@ const Footer = () => {
           </div>
 
           {[
-            { title: "Equipment", links: ["Excavators", "Cranes", "Bulldozers", "Mixers"] },
+            { title: "Equipment", links: ["SLCM Mixers", "Batching Plants", "Transit Mixers", "Concrete Pumps"], filters: ["SLCM", "Batching Plants", "Transit Mixers", "Concrete Pumps"] },
             { title: "Company", links: ["About Us", "Careers", "Blog", "Contact"] },
             { title: "Support", links: ["Help Center", "Safety", "Terms", "Privacy"] },
           ].map((col) => (
             <div key={col.title}>
               <h4 className="font-semibold text-foreground mb-3">{col.title}</h4>
               <ul className="space-y-2">
-                {col.links.map((link) => (
+                {col.links.map((link, index) => (
                   <li key={link}>
-                    <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                      {link}
-                    </a>
+                    {col.title === "Equipment" ? (
+                      <button
+                        onClick={() => handleEquipmentClick(col.filters[index])}
+                        className="text-sm text-muted-foreground hover:text-primary transition-colors text-left bg-transparent border-none p-0 cursor-pointer"
+                      >
+                        {link}
+                      </button>
+                    ) : (
+                      <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        {link}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

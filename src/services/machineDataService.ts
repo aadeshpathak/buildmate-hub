@@ -123,7 +123,7 @@ export class MachineDataService {
   }
 
   private parseMachineData(text: string): ParsedMachine[] {
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+    const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line);
     const machines: ParsedMachine[] = [];
 
     let currentSection = '';
@@ -171,8 +171,8 @@ export class MachineDataService {
         continue;
       }
 
-      // Parse SLCM machines (table rows with Argo)
-      if (currentSection === 'SLCM' && line.includes('|') && line.includes('Argo')) {
+      // Parse SLCM machines (table rows with numbers)
+      if (currentSection === 'SLCM' && line.includes('|') && /\d/.test(line)) {
         let fullLine = line;
 
         // Check if next lines are continuation (Argo model or Acura)
@@ -194,9 +194,9 @@ export class MachineDataService {
         }
       }
 
-      // Parse other machine types (table rows)
+      // Parse other machine types (table rows with numbers)
       else if ((currentSection === 'CRB' || currentSection === 'IRB' || currentSection === 'IBP' ||
-                currentSection === 'AF' || currentSection === 'ASP') && line.includes('|')) {
+                currentSection === 'AF' || currentSection === 'ASP') && line.includes('|') && /\d/.test(line)) {
         const machine = this.parseOtherMachineLine(line, currentSection);
         if (machine) {
           machines.push(machine);

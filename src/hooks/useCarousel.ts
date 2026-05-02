@@ -3,22 +3,67 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 export const useMobileCarousel = (totalItems: number) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [translateX, setTranslateX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const itemWidth = useRef(0);
+  const gap = useRef(16); // 16px gap between items
+
+  // Touch handling
   const startX = useRef(0);
   const currentX = useRef(0);
-  const isScrolling = useRef(false);
+  const startTime = useRef(0);
+  const isDraggingRef = useRef(false);
+  const animationRef = useRef<number>();
+
+  const itemWithGap = itemWidth.current + gap.current;
+
+  const updateItemWidth = useCallback(() => {
+    if (containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth;
+      // Account for padding and ensure cards fit properly
+      itemWidth.current = Math.min(280, containerWidth - 32); // Max 280px, min container width
+      gap.current = 16;
+    }
+  }, []);
+
+  const animateToIndex = useCallback((targetIndex: number) => {
+    if (!containerRef.current) return;
+
+    const targetTranslateX = -targetIndex * itemWithGap;
+    const startTranslateX = translateX;
+    const distance = targetTranslateX - startTranslateX;
+    const duration = 300; // 300ms animation
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Easing function (ease-out cubic)
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentTranslateX = startTranslateX + distance * easeOut;
+
+      setTranslateX(currentTranslateX);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        setActiveIndex(targetIndex);
+        setTranslateX(targetTranslateX);
+      }
+    };
+
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    animate();
+  }, [translateX, itemWithGap]);
 
   const scrollToIndex = useCallback((index: number) => {
-    if (containerRef.current && index >= 0 && index < totalItems) {
-      setActiveIndex(index);
-      const container = containerRef.current;
-      const itemWidth = container.clientWidth;
-      container.scrollTo({
-        left: index * itemWidth,
-        behavior: 'smooth'
-      });
+    if (index >= 0 && index < totalItems) {
+      animateToIndex(index);
     }
-  }, [totalItems]);
+  }, [totalItems, animateToIndex]);
 
   const goToNext = useCallback(() => {
     if (activeIndex < totalItems - 1) {
@@ -33,57 +78,94 @@ export const useMobileCarousel = (totalItems: number) => {
   }, [activeIndex, scrollToIndex]);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
+    updateItemWidth();
     startX.current = e.touches[0].clientX;
     currentX.current = e.touches[0].clientX;
-    setIsDragging(true);
-    isScrolling.current = false;
-  }, []);
+    startTime.current = Date.now();
+    isDraggingRef.current = false;
+
+    // Cancel any ongoing animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+  }, [updateItemWidth]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (!isDragging) return;
+    if (isDraggingRef.current) {
+      currentX.current = e.touches[0].clientX;
+      const deltaX = currentX.current - startX.current;
 
-    currentX.current = e.touches[0].clientX;
-    const deltaX = Math.abs(currentX.current - startX.current);
-    const deltaY = Math.abs(e.touches[0].clientY - startX.current); // Note: This should track Y from start
+      // Apply resistance at boundaries
+      let newTranslateX = translateX + deltaX * 0.5; // Dampen the movement
 
-    // Determine if scrolling horizontally
-    if (!isScrolling.current && deltaX > deltaY && deltaX > 10) {
-      isScrolling.current = true;
-      e.preventDefault(); // Prevent vertical scroll when swiping horizontally
-    }
+      // Boundary constraints with resistance
+      const minTranslateX = -(totalItems - 1) * itemWithGap;
+      const maxTranslateX = 0;
 
-    if (isScrolling.current) {
+      if (newTranslateX > maxTranslateX) {
+        newTranslateX = maxTranslateX + (newTranslateX - maxTranslateX) * 0.3; // Resistance
+      } else if (newTranslateX < minTranslateX) {
+        newTranslateX = minTranslateX + (newTranslateX - minTranslateX) * 0.3; // Resistance
+      }
+
+      setTranslateX(newTranslateX);
       e.preventDefault();
-    }
-  }, [isDragging]);
+    } else {
+      // Determine if this is a horizontal swipe
+      const deltaX = Math.abs(e.touches[0].clientX - startX.current);
+      const deltaY = Math.abs(e.touches[0].clientY - (startX.current + (translateX / itemWithGap) * gap.current)); // Approximate Y tracking
 
-  const handleTouchEnd = useCallback((e: TouchEvent) => {
-    if (!isDragging) return;
-
-    const deltaX = currentX.current - startX.current;
-    const velocity = Math.abs(deltaX);
-
-    setIsDragging(false);
-
-    // Swipe detection with velocity threshold
-    if (velocity > 50) {
-      if (deltaX > 0 && activeIndex > 0) {
-        goToPrev();
-      } else if (deltaX < 0 && activeIndex < totalItems - 1) {
-        goToNext();
+      if (deltaX > deltaY && deltaX > 10) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+        e.preventDefault();
       }
     }
-  }, [isDragging, activeIndex, totalItems, goToNext, goToPrev]);
+  }, [translateX, totalItems, itemWithGap]);
 
-  const handleScroll = useCallback(() => {
-    if (containerRef.current) {
-      const container = containerRef.current;
-      const itemWidth = container.clientWidth;
-      const scrollLeft = container.scrollLeft;
-      const newIndex = Math.round(scrollLeft / itemWidth);
-      setActiveIndex(newIndex);
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (!isDraggingRef.current) return;
+
+    const deltaX = currentX.current - startX.current;
+    const deltaTime = Date.now() - startTime.current;
+    const velocity = Math.abs(deltaX) / deltaTime; // pixels per ms
+
+    setIsDragging(false);
+    isDraggingRef.current = false;
+
+    // Determine target index based on position and velocity
+    const currentPosition = -translateX / itemWithGap;
+    let targetIndex = Math.round(currentPosition);
+
+    // Apply velocity threshold for additional slide
+    const velocityThreshold = 0.5; // pixels/ms threshold
+    if (velocity > velocityThreshold) {
+      if (deltaX > 0 && targetIndex > 0) {
+        targetIndex = Math.max(0, targetIndex - 1);
+      } else if (deltaX < 0 && targetIndex < totalItems - 1) {
+        targetIndex = Math.min(totalItems - 1, targetIndex + 1);
+      }
     }
-  }, []);
+
+    // Ensure target index is within bounds
+    targetIndex = Math.max(0, Math.min(totalItems - 1, targetIndex));
+
+    animateToIndex(targetIndex);
+  }, [translateX, itemWithGap, totalItems, animateToIndex]);
+
+  // Initialize on mount and resize
+  useEffect(() => {
+    updateItemWidth();
+
+    const handleResize = () => {
+      updateItemWidth();
+      // Reset position on resize
+      setTranslateX(-activeIndex * itemWithGap);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [activeIndex, itemWithGap, updateItemWidth]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -91,16 +173,14 @@ export const useMobileCarousel = (totalItems: number) => {
       container.addEventListener('touchstart', handleTouchStart, { passive: false });
       container.addEventListener('touchmove', handleTouchMove, { passive: false });
       container.addEventListener('touchend', handleTouchEnd, { passive: false });
-      container.addEventListener('scroll', handleScroll, { passive: true });
 
       return () => {
         container.removeEventListener('touchstart', handleTouchStart);
         container.removeEventListener('touchmove', handleTouchMove);
         container.removeEventListener('touchend', handleTouchEnd);
-        container.removeEventListener('scroll', handleScroll);
       };
     }
-  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleScroll]);
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   return {
     activeIndex,
@@ -111,8 +191,8 @@ export const useMobileCarousel = (totalItems: number) => {
     goToPrev,
     canGoNext: activeIndex < totalItems - 1,
     canGoPrev: activeIndex > 0,
-    transform: 'translateX(0px)',
-    itemWithGap: 0,
-    totalWidth: 0
+    transform: `translateX(${translateX}px)`,
+    itemWithGap,
+    totalWidth: totalItems * itemWithGap
   };
 };

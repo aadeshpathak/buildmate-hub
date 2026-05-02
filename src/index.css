@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   :root {
     /* Premium Theme: Obsidian Black & Golden Yellow */
     --background: 220 27% 2%;
@@ -52,6 +56,14 @@
     --premium-concrete: 210 12% 90%;
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
+
+    /* JCB Brand Colors */
+    --jcb-yellow: 45 86% 58%;
+    --jcb-yellow-light: 45 86% 68%;
+    --jcb-yellow-dark: 45 86% 48%;
+    --jcb-black: 220 27% 2%;
+    --jcb-dark: 220 27% 6%;
+    --jcb-darker: 220 27% 1%;
 
     /* Enhanced Glassmorphism */
     --glass-bg: 220 27% 6% / 0.8;
