@@ -30,6 +30,15 @@ const MachinesSection = () => {
 
   const { machines, loading, error } = useMachines();
 
+  // Debug: Log machines and their categories
+  console.log('Loaded machines:', machines.length);
+  const categoryCounts = {};
+  machines.forEach(m => {
+    categoryCounts[m.category] = (categoryCounts[m.category] || 0) + 1;
+  });
+  console.log('Category counts:', categoryCounts);
+  machines.slice(0, 5).forEach(m => console.log(`Machine: ${m.name}, Category: ${m.category}, Available: ${m.available}`));
+
   // Update local search when prop changes
   useEffect(() => {
     setLocalSearch(search);
@@ -103,14 +112,16 @@ const MachinesSection = () => {
       matchesFilter = machineCategory === "asp";
     }
 
-
+    // Debug logging
+    if (activeFilter !== "All" && !matchesFilter) {
+      console.log(`Machine ${m.name} category: "${m.category}" -> "${machineCategory}" does not match filter "${activeFilter}"`);
+    }
 
     return matchesSearch && matchesFilter && m.available;
   });
 
-
-
-
+  // Debug: Log current filter and search
+  console.log('Active filter:', activeFilter, 'Search:', search, 'Filtered count:', filtered.length);
 
   const carousel = useMobileCarousel(filtered.length);
 
@@ -167,7 +178,11 @@ const MachinesSection = () => {
           {filters.map((f) => (
             <button
               key={f}
-              onClick={() => setActiveFilter(f)}
+              onClick={() => {
+                setActiveFilter(f);
+                setSearch(""); // Clear search when changing filters
+                setLocalSearch(""); // Clear local search as well
+              }}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                 activeFilter === f
                   ? "bg-primary text-primary-foreground"

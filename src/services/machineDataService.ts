@@ -133,27 +133,27 @@ export class MachineDataService {
       const line = lines[i];
 
       // Section headers
-      if (line.includes('=== SLCM')) {
+      if (line.includes('Self Loading Concrete Mixers') || line.includes('SLCM')) {
         currentSection = 'SLCM';
         continue;
       }
-      if (line.includes('=== BATCHING PLANTS - CRB')) {
+      if (line.includes('BATCHING PLANTS - CRB') || line.includes('CRB Batching Plants')) {
         currentSection = 'CRB';
         continue;
       }
-      if (line.includes('=== BATCHING PLANTS - IRB')) {
+      if (line.includes('BATCHING PLANTS - IRB') || line.includes('IRB Batching Plants')) {
         currentSection = 'IRB';
         continue;
       }
-      if (line.includes('=== BATCHING PLANTS - IBP')) {
+      if (line.includes('BATCHING PLANTS - IBP') || line.includes('IBP Batching Plants')) {
         currentSection = 'IBP';
         continue;
       }
-      if (line.includes('=== TRANSIT MIXERS')) {
+      if (line.includes('TRANSIT MIXERS') || line.includes('Transit Mixers')) {
         currentSection = 'AF';
         continue;
       }
-      if (line.includes('=== CONCRETE PUMPS')) {
+      if (line.includes('CONCRETE PUMPS') || line.includes('Concrete Pumps')) {
         currentSection = 'ASP';
         continue;
       }
@@ -171,8 +171,8 @@ export class MachineDataService {
         continue;
       }
 
-      // Parse SLCM machines (numbered lines with prices)
-      if (currentSection === 'SLCM' && /^\d+/.test(line) && line.includes('Argo')) {
+      // Parse SLCM machines (table rows with Argo)
+      if (currentSection === 'SLCM' && line.includes('|') && line.includes('Argo')) {
         let fullLine = line;
 
         // Check if next lines are continuation (Argo model or Acura)
@@ -194,9 +194,9 @@ export class MachineDataService {
         }
       }
 
-      // Parse other machine types (model - capacity format)
+      // Parse other machine types (table rows)
       else if ((currentSection === 'CRB' || currentSection === 'IRB' || currentSection === 'IBP' ||
-                currentSection === 'AF' || currentSection === 'ASP') && line.includes('-')) {
+                currentSection === 'AF' || currentSection === 'ASP') && line.includes('|')) {
         const machine = this.parseOtherMachineLine(line, currentSection);
         if (machine) {
           machines.push(machine);
@@ -209,15 +209,20 @@ export class MachineDataService {
 
   private parseSLCMachineLine(line: string): ParsedMachine | null {
     try {
-      // Extract prices using regex - look for the pattern XX,XX,XXX XX,XX,XXX at the end
-      const priceRegex = /(\d+(?:,\d{3})*)\s+(\d+(?:,\d{3})*)$/;
-      const priceMatch = line.match(priceRegex);
+      // Parse table row: | Model | Variant | Capacity | Description | List Price | ASP Price |
+      const columns = line.split('|').map(col => col.trim()).filter(col => col);
 
-      if (!priceMatch) return null;
+      if (columns.length < 6) return null;
 
-      const listPriceStr = priceMatch[1];
-      const aspPriceStr = priceMatch[2];
-      const descriptionPart = line.replace(priceRegex, '').trim();
+      const model = columns[0];
+      const variant = columns[1];
+      const capacity = columns[2];
+      const description = columns[3];
+      const listPriceStr = columns[4].replace(/,/g, '');
+      const aspPriceStr = columns[5].replace(/,/g, '');
+
+      // Skip header rows
+      if (model === 'Model' || !model.includes('Argo')) return null;
 
       // Extract serial number
       const slNoMatch = descriptionPart.match(/^(\d+)/);
@@ -227,56 +232,22 @@ export class MachineDataService {
       const modelDesc = descriptionPart.replace(/^\d+\s*/, '');
 
       // Parse prices
-      const listPrice = parseInt(listPriceStr.replace(/,/g, ''), 10);
-      const aspPrice = parseInt(aspPriceStr.replace(/,/g, ''), 10);
-
-      // Initialize variables
-      let model = '';
-      let capacity = '';
-      let hasSwivelDrum = false;
-      let hasLoadCell = false;
-      let isAcura = false;
-
-      // Extract model name
-      const argoMatch = line.match(/Argo\s+(\d+)/);
-      if (argoMatch) {
-        model = `Argo ${argoMatch[1]}`;
-      }
-
-      // Extract capacity
-      const capacityMatch = modelDesc.match(/(\d+(?:\.\d+)?)\s*m3/);
-      if (capacityMatch) {
-        capacity = `${capacityMatch[1]} m³`;
-      }
+      const listPrice = parseInt(listPriceStr, 10);
+      const aspPrice = parseInt(aspPriceStr, 10);
 
       // Check for features
-      const fullDesc = modelDesc.toLowerCase();
-      hasSwivelDrum = fullDesc.includes('swivel drum');
-      hasLoadCell = fullDesc.includes('load cell');
-      isAcura = fullDesc.includes('acura');
-
-      // If no model but we have capacity, infer model from capacity
-      if (!model && capacity) {
-        const capNum = parseFloat(capacity);
-        const capacityMap: Record<string, string> = {
-          '1': 'Argo 1000',
-          '2': 'Argo 2000',
-          '2.3': 'Argo 2300',
-          '2.8': 'Argo 2800',
-          '3.5': 'Argo 3500',
-          '4.3': 'Argo 4300',
-          '4.8': 'Argo 4800'
-        };
-        model = capacityMap[capNum.toString()] || `Argo ${Math.round(capNum * 1000)}`;
-      }
+      const fullDesc = description.toLowerCase();
+      const hasSwivelDrum = fullDesc.includes('swivel') || variant.toLowerCase().includes('swivel');
+      const hasLoadCell = fullDesc.includes('load cell') || variant.toLowerCase().includes('load cell');
+      const isAcura = fullDesc.includes('acura') || variant.toLowerCase().includes('acura');
 
       // Generate ID
-      const id = model ? model.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : `argo-${slNo}`;
+      const id = model.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
       return {
         id,
-        model: model || `Argo ${slNo}`,
-        description: modelDesc,
+        model,
+        description: `${variant}: ${description}`,
         capacity,
         listPrice,
         aspPrice,
@@ -292,59 +263,55 @@ export class MachineDataService {
 
   private parseOtherMachineLine(line: string, category: string): ParsedMachine | null {
     try {
-      // Parse lines like "CRB 20 - 20 cu.m/hr" or "CRB 20 - 20 cu.m/hr - 20,00,000 24,00,000"
-      const parts = line.split(' - ');
-      if (parts.length < 2) return null;
+      // Parse table row: | Model | Capacity | Description | Avg Price | List Price |
+      const columns = line.split('|').map(col => col.trim()).filter(col => col);
 
-      const model = parts[0].trim();
-      const capacity = parts[1].trim();
-      let listPrice = 0;
-      let aspPrice = 0;
+      if (columns.length < 4) return null;
 
-      // Check if there are prices after another -
-      if (parts.length >= 3) {
-        const pricePart = parts[2].trim();
-        const priceMatch = pricePart.match(/(\d+(?:,\d{3})*)\s+(\d+(?:,\d{3})*)$/);
-        if (priceMatch) {
-          listPrice = parseInt(priceMatch[1].replace(/,/g, ''));
-          aspPrice = parseInt(priceMatch[2].replace(/,/g, ''));
-        }
-      }
+      const model = columns[0];
+      const capacity = columns[1];
+      const description = columns[2];
+      const avgPriceStr = columns[3]?.replace(/,/g, '') || '';
+      const listPriceStr = columns[4]?.replace(/,/g, '') || '';
+
+      // Skip header rows
+      if (model === 'Model' || model.includes('Capacity')) return null;
+
+      // Parse prices
+      const listPrice = parseInt(listPriceStr, 10) || 0;
+      const aspPrice = parseInt(avgPriceStr, 10) || 0; // Use avg as ASP
 
       // Generate ID
       const id = model.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-      // If prices not parsed, set default prices based on category
-      if (listPrice === 0 || aspPrice === 0) {
-        // Default pricing based on category and capacity
+      // Default pricing if not available
+      let finalListPrice = listPrice;
+      let finalAspPrice = aspPrice;
+
+      if (finalListPrice === 0 || finalAspPrice === 0) {
+        const capNum = parseInt(capacity) || 20;
         if (category.startsWith('CRB') || category.startsWith('IRB') || category.startsWith('IBP')) {
-          // Batching plants - price per capacity
-          const capNum = parseInt(capacity);
-          listPrice = capNum * 50000; // Rough estimate
-          aspPrice = capNum * 60000;
+          finalListPrice = capNum * 50000;
+          finalAspPrice = capNum * 60000;
         } else if (category === 'AF') {
-          // Transit mixers
-          const capNum = parseInt(capacity);
-          listPrice = capNum * 800000; // Rough estimate
-          aspPrice = capNum * 950000;
+          finalListPrice = capNum * 800000;
+          finalAspPrice = capNum * 950000;
         } else if (category === 'ASP') {
-          // Concrete pumps
-          const capNum = parseInt(capacity);
-          listPrice = capNum * 120000; // Rough estimate
-          aspPrice = capNum * 140000;
+          finalListPrice = capNum * 120000;
+          finalAspPrice = capNum * 140000;
         }
       }
 
       return {
         id,
         model,
-        description: `${model} ${category} Series`,
+        description,
         capacity,
-        listPrice,
-        aspPrice,
+        listPrice: finalListPrice,
+        aspPrice: finalAspPrice,
         hasSwivelDrum: false,
-        hasLoadCell: category.includes('Acura') || category === 'SLCM',
-        isAcura: category.includes('Acura')
+        hasLoadCell: false,
+        isAcura: false
       };
     } catch (error) {
       console.error('Error parsing other machine line:', error);
