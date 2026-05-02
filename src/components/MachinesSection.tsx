@@ -93,14 +93,14 @@ const MachinesSection = () => {
 
     if (activeFilter === "All") {
       matchesFilter = true;
-    } else if (activeFilter === "Batching Plants") {
-      matchesFilter = machineCategory === "batching plants";
     } else if (activeFilter === "SLCM") {
-      matchesFilter = machineCategory === "slcm mixers";
+      matchesFilter = machineCategory === "slcm";
+    } else if (activeFilter === "Batching Plants") {
+      matchesFilter = machineCategory === "crb" || machineCategory === "irb" || machineCategory === "ibp";
     } else if (activeFilter === "Transit Mixers") {
-      matchesFilter = machineCategory === "transit mixers";
+      matchesFilter = machineCategory === "af";
     } else if (activeFilter === "Concrete Pumps") {
-      matchesFilter = machineCategory === "concrete pumps";
+      matchesFilter = machineCategory === "asp";
     }
 
 
