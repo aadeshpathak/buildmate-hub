@@ -770,33 +770,33 @@ const Dashboard = () => {
 
       {/* Mobile Bottom Navigation */}
       {isMobile && (
-        <nav className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-white/20 border border-white/20 px-4 py-3 rounded-full safe-area-inset-bottom z-50 shadow-2xl">
+        <nav className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-white/20 border border-white/20 px-6 py-3 rounded-full safe-area-inset-bottom z-50 shadow-2xl">
           <div className="flex items-center justify-around">
-            {mobileNavItems.slice(0, 4).map((item) => (
+              {mobileNavItems.slice(0, 4).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex flex-col items-center px-2 py-2 rounded-lg transition-colors ${
+                    activeTab === item.id
+                      ? 'text-yellow-400 bg-yellow-500/20'
+                      : 'text-gray-400 hover:text-gray-200'
+                  }`}
+                >
+                  <item.icon className={`w-5 h-5 mb-1 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
+                  <span className="text-xs font-medium">{item.label}</span>
+                </button>
+              ))}
               <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center px-3 py-2 rounded-lg transition-colors ${
-                  activeTab === item.id
+                onClick={() => setMobileMenuOpen(true)}
+                className={`flex flex-col items-center px-2 py-2 rounded-lg transition-colors ${
+                  mobileMenuOpen
                     ? 'text-yellow-400 bg-yellow-500/20'
                     : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
-                <item.icon className={`w-6 h-6 mb-1 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
-                <span className="text-xs font-medium">{item.label}</span>
+                <Menu className="w-5 h-5 mb-1" />
+                <span className="text-xs font-medium">More</span>
               </button>
-            ))}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className={`flex flex-col items-center px-3 py-2 rounded-lg transition-colors ${
-                mobileMenuOpen
-                  ? 'text-yellow-400 bg-yellow-500/20'
-                  : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              <Menu className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">More</span>
-            </button>
           </div>
         </nav>
       )}
@@ -818,7 +818,7 @@ const Dashboard = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/3 rounded-t-2xl z-50 p-6 safe-area-inset-bottom border-t border-white/10"
+              className="fixed bottom-20 left-4 right-4 backdrop-blur-xl bg-white/3 rounded-2xl z-50 p-6 border border-white/10 shadow-xl"
             >
               <div className="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6" />
               <h3 className="text-lg font-semibold text-white mb-4">More Options</h3>
