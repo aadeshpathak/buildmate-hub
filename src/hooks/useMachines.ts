@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMachines, searchMachines, getMachinesByCategory, type Machine } from '@/services/machineService';
+import { loadMachines } from '@/data/machines';
 
 export const useMachines = (searchTerm?: string, category?: string) => {
   const [machines, setMachines] = useState<Machine[]>([]);
@@ -20,6 +21,12 @@ export const useMachines = (searchTerm?: string, category?: string) => {
         machineData = await getMachines();
       }
 
+      // If Firestore returned no data, fall back to file loading
+      if (!machineData || machineData.length === 0) {
+        console.log('No data from Firestore, falling back to file loading...');
+        machineData = await loadMachines();
+      }
+
       // Load all machines at once for better performance
       if (machineData.length > 0) {
         setMachines(machineData);
@@ -31,11 +38,21 @@ export const useMachines = (searchTerm?: string, category?: string) => {
         setHasMore(false);
       }
     } catch (err) {
-      console.error('Error fetching machines from Firebase:', err);
-      setError('Failed to connect to Firebase. Please check your internet connection.');
-      setMachines([]);
-      setLoadedCount(0);
-      setHasMore(false);
+      console.error('Error fetching machines from Firebase, trying file fallback:', err);
+      try {
+        // Fallback to file loading if Firestore fails
+        const machineData = await loadMachines();
+        setMachines(machineData);
+        setLoadedCount(machineData.length);
+        setHasMore(false);
+        setError(null); // Clear error since fallback worked
+      } catch (fallbackErr) {
+        console.error('File fallback also failed:', fallbackErr);
+        setError('Failed to load machines. Please check your connection.');
+        setMachines([]);
+        setLoadedCount(0);
+        setHasMore(false);
+      }
     } finally {
       setLoading(false);
     }

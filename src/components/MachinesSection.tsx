@@ -9,12 +9,20 @@ import BookingModal from "./BookingModal";
 import { useMobileCarousel } from "@/hooks/useCarousel";
 import { useMachines } from "@/hooks/useMachines";
 import { type Machine } from "@/data/machines";
+import { useLocation } from "react-router-dom";
 
 const filters = ["All", "SLCM", "Batching Plants", "Transit Mixers", "Concrete Pumps"];
 
 const MachinesSection = () => {
+  const location = useLocation();
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
-  const [activeFilter, setActiveFilter] = useState("All");
+
+  // Get filter from URL params
+  const urlParams = new URLSearchParams(location.search);
+  const filterFromUrl = urlParams.get('filter');
+  const initialFilter = filterFromUrl && filters.includes(filterFromUrl) ? filterFromUrl : "All";
+
+  const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [search, setSearch] = useState("");
   const [localSearch, setLocalSearch] = useState(search);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -26,6 +34,32 @@ const MachinesSection = () => {
   useEffect(() => {
     setLocalSearch(search);
   }, [search]);
+
+  // Update activeFilter when URL filter changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const filterFromUrl = urlParams.get('filter');
+    if (filterFromUrl && filters.includes(filterFromUrl)) {
+      setActiveFilter(filterFromUrl);
+    }
+  }, [location.search]);
+
+  // Scroll to section when filter is applied and machines are loaded
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const filterFromUrl = urlParams.get('filter');
+    if (filterFromUrl && filters.includes(filterFromUrl) && !loading && machines.length > 0) {
+      // Small delay to ensure rendering is complete
+      setTimeout(() => {
+        const element = document.getElementById('machines');
+        if (element) {
+          const yOffset = -20;
+          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 300);
+    }
+  }, [activeFilter, loading, machines.length, location.search]);
 
   // Debounced search update - only update after user stops typing
   const handleSearchChange = useCallback((value: string) => {
@@ -50,12 +84,33 @@ const MachinesSection = () => {
   }, []);
 
   const filtered = machines.filter((m) => {
-    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter =
-      activeFilter === "All" ||
-      m.category === activeFilter;
+    // Search filtering (if search is empty, matchesSearch is true)
+    const matchesSearch = search.trim() === "" || m.name.toLowerCase().includes(search.toLowerCase());
+
+    // Category filtering
+    let matchesFilter = false;
+    const machineCategory = (m.category || "").toLowerCase().trim();
+
+    if (activeFilter === "All") {
+      matchesFilter = true;
+    } else if (activeFilter === "Batching Plants") {
+      matchesFilter = machineCategory === "batching plants";
+    } else if (activeFilter === "SLCM") {
+      matchesFilter = machineCategory === "slcm mixers";
+    } else if (activeFilter === "Transit Mixers") {
+      matchesFilter = machineCategory === "transit mixers";
+    } else if (activeFilter === "Concrete Pumps") {
+      matchesFilter = machineCategory === "concrete pumps";
+    }
+
+
+
     return matchesSearch && matchesFilter && m.available;
   });
+
+
+
+
 
   const carousel = useMobileCarousel(filtered.length);
 

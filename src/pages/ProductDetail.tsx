@@ -386,7 +386,7 @@ const ProductDetail = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-20 left-4 right-4 backdrop-blur-xl bg-white/3 rounded-2xl z-50 p-6 border border-white/10 shadow-xl"
+              className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-white/3 rounded-2xl z-50 p-6 safe-area-inset-bottom border border-white/10"
             >
               <div className="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6" />
               <h3 className="text-lg font-semibold text-white mb-4">More Options</h3>

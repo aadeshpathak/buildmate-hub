@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMachines } from '@/hooks/useMachines';
 import { Machine } from '@/data/machines';
+import { Loader2 } from 'lucide-react';
 
 interface Booking {
   id: string;
@@ -209,31 +210,28 @@ const Dashboard = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [viewAllCategory, setViewAllCategory] = useState<string | null>(null);
-  const [viewAllLimit, setViewAllLimit] = useState(5); // Start with 5 machines in view all
+  const [viewAllLimit, setViewAllLimit] = useState(5);
+  const [viewAllMachines, setViewAllMachines] = useState<Machine[]>([]);
+ // Start with 5 machines in view all
 
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { machines, loading: machinesLoading, loadedCount, hasMore } = useMachines(searchQuery, selectedCategory);
+  // Always load all machines for dashboard category sections
+  const { machines, loading: machinesLoading, loadedCount, hasMore } = useMachines('', 'all');
 
-  // Handle category filter changes with loading state
+  // Handle category filter changes
   const handleCategoryChange = (category: string) => {
-    setIsFilterLoading(true);
     setSelectedCategory(category);
     setSearchQuery(''); // Clear search when filtering by category
     setDisplayLimit(6); // Reset display limit when changing categories
     setViewAllCategory(null); // Exit view all mode
     setViewAllLimit(5); // Reset view all limit
-
-    // Reset loading after a short delay or when machines load
-    setTimeout(() => {
-      setIsFilterLoading(false);
-    }, 500);
   };
 
   // Handle view all for a category
   const handleViewAll = (category: string) => {
     setViewAllCategory(category);
-    setViewAllLimit(5); // Start with 5 machines
+    setViewAllLimit(5);
   };
 
   // Load more machines in view all mode
@@ -261,6 +259,13 @@ const Dashboard = () => {
     }
   }, [machinesLoading]);
 
+  // Scroll to top when viewAllCategory changes
+  useEffect(() => {
+    if (viewAllCategory) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [viewAllCategory]);
+
   // Load wishlist and bookings from localStorage
   useEffect(() => {
     const savedWishlist = localStorage.getItem('buildmate_wishlist');
@@ -282,40 +287,35 @@ const Dashboard = () => {
   const machinesByCategory = useMemo(() => {
     const grouped: { [key: string]: Machine[] } = {};
     machines.forEach(machine => {
-      if (!grouped[machine.category]) {
-        grouped[machine.category] = [];
+      const cat = machine.category?.trim() || 'Unknown';
+      if (!grouped[cat]) {
+        grouped[cat] = [];
       }
-      grouped[machine.category].push(machine);
+      grouped[cat].push(machine);
     });
     return grouped;
   }, [machines]);
 
-  // Filter machines based on display limit and category (client-side fallback)
-  const displayedMachines = useMemo(() => {
-    let filteredMachines = machines;
-
-    // If useMachines hook didn't filter properly, filter here
-    if (selectedCategory !== 'all' && machines.length > 0) {
-      filteredMachines = machines.filter(machine =>
-        machine.category.toLowerCase() === selectedCategory.toLowerCase()
+  // Update viewAllMachines when machines or viewAllCategory change
+  useEffect(() => {
+    if (viewAllCategory) {
+      // Filter machines directly by category (case-insensitive and trimmed)
+      const machinesForCategory = machines.filter(machine =>
+        machine.category && machine.category.trim().toLowerCase() === viewAllCategory.trim().toLowerCase()
       );
+      setViewAllMachines(machinesForCategory);
     }
+  }, [machines, viewAllCategory]);
 
-    return filteredMachines.slice(0, displayLimit);
-  }, [machines, displayLimit, selectedCategory]);
+  // Filter machines based on display limit (since we always load all machines now)
+  const displayedMachines = useMemo(() => {
+    return machines.slice(0, displayLimit);
+  }, [machines, displayLimit]);
 
-  // Machines for view all mode
-  const viewAllMachines = useMemo(() => {
-    if (!viewAllCategory) return [];
-    return machinesByCategory[viewAllCategory]?.slice(0, viewAllLimit) || [];
-  }, [machinesByCategory, viewAllCategory, viewAllLimit]);
+
 
   // Check if all machines are loaded in view all
-  const isAllLoadedInViewAll = useMemo(() => {
-    if (!viewAllCategory) return false;
-    const totalInCategory = machinesByCategory[viewAllCategory]?.length || 0;
-    return viewAllLimit >= totalInCategory;
-  }, [machinesByCategory, viewAllCategory, viewAllLimit]);
+  const isAllLoadedInViewAll = viewAllLimit >= viewAllMachines.length;
 
   // Get available categories
   const categories = Object.keys(machinesByCategory);
@@ -502,124 +502,126 @@ const Dashboard = () => {
               </div>
 
               {/* Search Results or Filtered Results or Explore Sections */}
-              {isFilterLoading || machinesLoading ? (
+              {machinesLoading ? (
                 <div className="flex justify-center items-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
                   <span className="ml-3 text-gray-300">Loading...</span>
                 </div>
-              ) : searchQuery ? (
-                // Search Results
+              ) : (
                 <div>
-                  <h2 className="text-xl font-semibold text-white mb-4">
-                    Search Results for "{searchQuery}"
-                  </h2>
-                  {displayedMachines.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Search className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <h3 className="text-lg font-medium text-white mb-2">No results found</h3>
-                      <p className="text-gray-400">Try adjusting your search terms</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {displayedMachines.map((machine) => (
-                          <MachineCard
-                            key={machine.id}
-                            machine={machine}
-                            isWishlisted={wishlist.includes(machine.id)}
-                            onToggleWishlist={toggleWishlist}
-                            onViewDetails={() => navigate(`/product/${machine.id}`)}
-                          />
-                        ))}
-                      </div>
-                      {displayedMachines.length < machines.length && (
-                        <div className="text-center mt-6">
-                          <button
-                            onClick={loadMore}
-                            className="px-6 py-3 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors"
-                          >
-                            Load More
-                          </button>
+                  {(() => {
+                    if (searchQuery) {
+                      // Search Results
+                      return (
+                        <div>
+                          <h2 className="text-xl font-semibold text-white mb-4">
+                            Search Results for "{searchQuery}"
+                          </h2>
+                          {displayedMachines.length === 0 ? (
+                            <div className="text-center py-12">
+                              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search className="w-8 h-8 text-gray-400" />
+                              </div>
+                              <h3 className="text-lg font-medium text-white mb-2">No results found</h3>
+                              <p className="text-gray-400">Try adjusting your search terms</p>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {displayedMachines.slice(0, viewAllLimit).map((machine, index) => (
+                                  <MachineCard
+                                    key={machine.id}
+                                    machine={machine}
+                                    index={index}
+                                    isWishlisted={wishlist.includes(machine.id)}
+                                    onToggleWishlist={toggleWishlist}
+                                    onViewDetails={() => navigate(`/product/${machine.id}`)}
+                                  />
+                                ))}
+                              </div>
+                              {displayedMachines.length < machines.length && (
+                                <div className="text-center mt-6">
+                                  <button
+                                    onClick={loadMore}
+                                    className="px-6 py-3 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors"
+                                  >
+                                    Load More
+                                  </button>
+                                </div>
+                              )}
+                            </>
+                          )}
                         </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              ) : selectedCategory !== 'all' ? (
-                // Filtered Results by Category
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-white">
-                      {selectedCategory} Equipment
-                    </h2>
-                    <button
-                      onClick={() => handleCategoryChange('all')}
-                      className="text-gray-400 hover:text-gray-200 text-sm underline"
-                    >
-                      Clear filter
-                    </button>
-                  </div>
-                  {displayedMachines.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Filter className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <h3 className="text-lg font-medium text-white mb-2">No equipment found</h3>
-                      <p className="text-gray-400">Try selecting a different category</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {displayedMachines.map((machine, index) => (
-                          <MachineCard
-                            key={machine.id}
-                            machine={machine}
-                            index={index}
-                            isWishlisted={wishlist.includes(machine.id)}
-                            onToggleWishlist={toggleWishlist}
-                            onViewDetails={() => navigate(`/product/${machine.id}`)}
-                          />
-                        ))}
-                      </div>
-                      {displayedMachines.length < machines.length && (
-                        <div className="text-center mt-6">
-                          <button
-                            onClick={loadMore}
-                            className="px-6 py-3 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors"
-                          >
-                            Load More
-                          </button>
+                      );
+                    } else if (viewAllCategory) {
+                      // View All Mode
+                      return (
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-4">
+                              <button
+                                onClick={() => setViewAllCategory(null)}
+                                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+                              >
+                                <ChevronRight className="w-5 h-5 rotate-180" />
+                                <span>Back</span>
+                              </button>
+                              <h2 className="text-xl font-bold text-white">{viewAllCategory} Equipment</h2>
+                            </div>
+                            {viewAllLimit > 5 && (
+                              <button
+                                onClick={() => setViewAllLimit(5)}
+                                className="text-gray-400 hover:text-gray-200 text-sm underline transition-colors"
+                              >
+                                Show Less
+                              </button>
+                            )}
+                          </div>
+
                         </div>
-                      )}
-                    </>
-                  )}
+                      );
+                    } else {
+                      // Category Sections (filtered by selectedCategory)
+                      let categorySections;
+                      if (selectedCategory === 'all') {
+                        // Show all categories
+                        categorySections = categories.slice(0, 6).map((category) => (
+                          <CategorySection
+                            key={category}
+                            title={category}
+                            machines={machinesByCategory[category]?.slice(0, 6) || []}
+                            wishlist={wishlist}
+                            onToggleWishlist={toggleWishlist}
+                            onViewDetails={(id) => navigate(`/product/${id}`)}
+                            onViewAll={() => handleViewAll(category)}
+                          />
+                        ));
+                      } else {
+                        // Show only selected category
+                        categorySections = categories.includes(selectedCategory) ? (
+                          <CategorySection
+                            key={selectedCategory}
+                            title={selectedCategory}
+                            machines={machinesByCategory[selectedCategory]?.slice(0, 6) || []}
+                            wishlist={wishlist}
+                            onToggleWishlist={toggleWishlist}
+                            onViewDetails={(id) => navigate(`/product/${id}`)}
+                            onViewAll={() => handleViewAll(selectedCategory)}
+                          />
+                        ) : null;
+                      }
+
+                      return (
+                        <div className="space-y-8">
+                          {/* Category Sections */}
+                          {categorySections}
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
-              ) : viewAllCategory ? (
-                // View All Mode
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={() => setViewAllCategory(null)}
-                        className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
-                      >
-                        <ChevronRight className="w-5 h-5 rotate-180" />
-                        <span>Back</span>
-                      </button>
-                      <h2 className="text-xl font-bold text-gray-900">{viewAllCategory} Equipment</h2>
-                    </div>
-                    {isAllLoadedInViewAll && (
-                      <button
-                        onClick={hideAll}
-                        className="text-gray-600 hover:text-gray-800 text-sm underline transition-colors"
-                      >
-                        Hide All
-                      </button>
-                    )}
-                  </div>
-                  {viewAllMachines.length === 0 ? (
+              )}
+              {viewAllMachines.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Filter className="w-8 h-8 text-gray-400" />
@@ -630,7 +632,7 @@ const Dashboard = () => {
                   ) : (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {displayedMachines.map((machine, index) => (
+                        {viewAllMachines.slice(0, viewAllLimit).map((machine, index) => (
                           <MachineCard
                             key={machine.id}
                             machine={machine}
@@ -654,24 +656,7 @@ const Dashboard = () => {
                       )}
                     </>
                   )}
-                </div>
-              ) : (
-                // Category Sections (when 'all' is selected)
-                <div className="space-y-8">
-                  {/* Category Sections */}
-                  {categories.slice(0, 4).map((category) => (
-                    <CategorySection
-                      key={category}
-                      title={category}
-                      machines={machinesByCategory[category]?.slice(0, 6) || []}
-                      wishlist={wishlist}
-                      onToggleWishlist={toggleWishlist}
-                      onViewDetails={(id) => navigate(`/product/${id}`)}
-                      onViewAll={() => handleViewAll(category)}
-                    />
-                  ))}
-                </div>
-              )}
+
             </div>
           )}
 
@@ -818,7 +803,7 @@ const Dashboard = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-20 left-4 right-4 backdrop-blur-xl bg-white/3 rounded-2xl z-50 p-6 border border-white/10 shadow-xl"
+              className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-white/3 rounded-2xl z-50 p-6 safe-area-inset-bottom border border-white/10"
             >
               <div className="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6" />
               <h3 className="text-lg font-semibold text-white mb-4">More Options</h3>

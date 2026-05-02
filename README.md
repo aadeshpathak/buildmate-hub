@@ -2,6 +2,10 @@
 
 A modern, responsive web application for renting construction equipment in India. BuildMate Hub serves as a premium platform connecting construction companies with heavy equipment providers, offering a seamless booking experience with real-time availability and comprehensive equipment details.
 
+## Site is live on
+
+[Click here](https://buildmate-hub.vercel.app/)
+
 ## Features
 
 - **Equipment Catalog**: Browse a wide range of construction machinery with detailed specifications, pricing, and availability
@@ -15,6 +19,7 @@ A modern, responsive web application for renting construction equipment in India
 ## Tech Stack
 
 ### Frontend
+
 - **React 18** - Modern React with hooks and concurrent features
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first CSS framework
@@ -25,6 +30,7 @@ A modern, responsive web application for renting construction equipment in India
 - **Vite** - Fast build tool and development server
 
 ### Development Tools
+
 - **ESLint** - Code linting
 - **Bun** - Fast JavaScript runtime and package manager
 - **Playwright** - End-to-end testing
@@ -32,17 +38,21 @@ A modern, responsive web application for renting construction equipment in India
 ## Installation
 
 ### Prerequisites
+
 - Node.js 18+ or Bun
 - Git
 
 ### Setup
+
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/prathameshtwrofficial/buildmate-hub.git
    cd buildmate-hub
    ```
 
 2. **Install dependencies**
+
    ```bash
    # Using npm
    npm install
@@ -55,6 +65,7 @@ A modern, responsive web application for renting construction equipment in India
    Create a `.env.local` file in the root directory with necessary environment variables (if any)
 
 4. **Start development server**
+
    ```bash
    # Using npm
    npm run dev
@@ -64,6 +75,7 @@ A modern, responsive web application for renting construction equipment in India
    ```
 
 5. **Build for production**
+
    ```bash
    # Using npm
    npm run build
@@ -75,6 +87,7 @@ A modern, responsive web application for renting construction equipment in India
 ## Usage
 
 ### For Users
+
 1. **Browse Equipment**: Visit the homepage to explore available machinery
 2. **Search & Filter**: Use the search bar and category filters to find specific equipment
 3. **Create Account**: Register for an account to access booking features
@@ -82,6 +95,7 @@ A modern, responsive web application for renting construction equipment in India
 5. **Manage Bookings**: View and manage your bookings in the dashboard
 
 ### For Equipment Providers
+
 1. **List Equipment**: Contact us to list your machinery on the platform
 2. **Manage Listings**: Update availability and pricing through the provider dashboard
 
@@ -147,6 +161,7 @@ We welcome contributions! Please follow these steps:
 5. Open a Pull Request
 
 ### Development Guidelines
+
 - Follow the existing code style
 - Write meaningful commit messages
 - Add tests for new features
@@ -159,6 +174,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 **Prathamesh Tiwari**
+
 - Portfolio: [https://www.self.so/prathamesh-surendra-tiwari-resume](https://www.self.so/prathamesh-surendra-tiwari-resume)
 - Email: [Your email here]
 
@@ -172,4 +188,5 @@ Project Link: [https://github.com/prathameshtwrofficial/buildmate-hub](https://g
 
 ---
 
-*Made by Prathamesh Tiwari*
+_Made by Prathamesh Tiwari_</content>
+<parameter name="filePath">README.md

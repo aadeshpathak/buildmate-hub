@@ -106,10 +106,10 @@ export async function getMachinesByCategory(categoryId: string): Promise<Machine
     // Client-side filtering by category
     // Very flexible filtering that tries multiple matching strategies
     const result = allMachines.filter(machine => {
-      const machineCategory = machine.category.toLowerCase();
-      const filterCategory = categoryId.toLowerCase();
+      const machineCategory = machine.category?.toLowerCase().trim() || '';
+      const filterCategory = categoryId.toLowerCase().trim();
 
-      // Exact match (case insensitive)
+      // Exact match (case insensitive, trimmed)
       if (machineCategory === filterCategory) return true;
 
       // Partial match - if either contains the other

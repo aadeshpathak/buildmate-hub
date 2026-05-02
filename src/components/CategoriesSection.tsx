@@ -2,9 +2,33 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { ArrowRight } from "lucide-react";
 import { categories } from "@/data/machines";
+import { useNavigate } from "react-router-dom";
 
 const CategoriesSection = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.2 });
+  const navigate = useNavigate();
+
+  const getFilterForCategory = (categoryId: string) => {
+    switch (categoryId) {
+      case 'slcm':
+        return 'SLCM';
+      case 'crb':
+      case 'irb':
+      case 'ibp':
+        return 'Batching Plants';
+      case 'af':
+        return 'Transit Mixers';
+      case 'asp':
+        return 'Concrete Pumps';
+      default:
+        return 'All';
+    }
+  };
+
+  const handleCategoryClick = (categoryId: string) => {
+    const filter = getFilterForCategory(categoryId);
+    navigate(`/?filter=${encodeURIComponent(filter)}`);
+  };
 
   return (
     <section id="categories" className="section-padding relative overflow-hidden" ref={ref}>
@@ -74,6 +98,7 @@ const CategoriesSection = () => {
                 scale: 1.05,
                 transition: { duration: 0.3, ease: "easeOut" }
               }}
+              onClick={() => handleCategoryClick(cat.id)}
               className="glass-card p-8 cursor-pointer group hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 relative overflow-hidden"
             >
               {/* Premium background effects */}
@@ -108,12 +133,17 @@ const CategoriesSection = () => {
                     <span className="text-sm font-medium text-muted-foreground">items</span>
                   </div>
 
-                  <motion.div
-                    whileHover={{ x: 4 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
-                  </motion.div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      View All
+                    </span>
+                    <motion.div
+                      whileHover={{ x: 4 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
+                    </motion.div>
+                  </div>
                 </div>
 
                 {/* Shimmer effect */}
