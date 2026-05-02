@@ -1,3 +1,5 @@
+import { Flame } from "lucide-react";
+
 const Footer = () => {
   return (
     <footer className="border-t border-border py-12 px-4 sm:px-6 lg:px-8">
@@ -35,8 +37,25 @@ const Footer = () => {
           ))}
         </div>
 
-        <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          © 2026 BuildRent. All rights reserved.
+        <div className="border-t border-border pt-8 text-center space-y-4">
+          <div className="text-sm text-muted-foreground">
+            © 2026 BuildRent. All rights reserved.
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/30 backdrop-blur-sm rounded-full border border-muted/50">
+            <span className="text-sm font-cursive text-muted-foreground">With</span>
+            <span className="text-lg">❤️</span>
+            <span className="text-sm font-cursive text-muted-foreground">from</span>
+            <a
+              href="https://www.self.so/prathamesh-surendra-tiwari-resume"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-cursive font-bold text-foreground hover:text-primary transition-colors"
+            >
+              Prathamesh Tiwari
+            </a>
+          </div>
         </div>
       </div>
     </footer>

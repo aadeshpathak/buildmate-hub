@@ -354,60 +354,53 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0C10] relative overflow-hidden">
+    <>
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <div className="fixed left-4 top-8 w-16 rounded-2xl bg-gray-900/90 backdrop-blur-xl border border-white/10 z-50 overflow-y-auto campfire-animation">
+          {/* Logo */}
+          <div className="p-3 border-b border-gray-700 flex justify-center">
+            <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
+              <Crown className="w-5 h-5 text-black" />
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="p-2">
+            <div className="space-y-1">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex justify-center items-center px-2 py-3 rounded-lg transition-all duration-200 ${
+                    activeTab === item.id
+                      ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                      : 'text-gray-300 hover:bg-gray-700/50'
+                  }`}
+                  title={item.label}
+                >
+                  <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
+                </button>
+              ))}
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="w-full flex justify-center items-center px-2 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          </nav>
+        </div>
+      )}
+
+      <div className="min-h-screen bg-[#0B0C10] relative overflow-hidden">
       {/* Subtle radial gradients for depth */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
       </div>
-      {/* Desktop Sidebar */}
-      {!isMobile && (
-        <div className="fixed left-0 top-0 h-full w-64 border-r border-white/10 shadow-lg z-50 backdrop-blur-xl bg-white/3">
-          {/* Logo */}
-          <div className="p-6 border-b border-gray-700">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
-                <Crown className="w-5 h-5 text-black" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-white">BuildMate</h1>
-                <p className="text-xs font-normal text-gray-400">Equipment Rental</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="p-4">
-            <div className="space-y-2">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                    activeTab === item.id
-                      ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                      : 'text-gray-300 hover:bg-gray-700/50'
-                  }`}
-                >
-                  <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </nav>
-
-          {/* Logout */}
-          <div className="absolute bottom-4 left-4 right-4">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Logout</span>
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Mobile Header */}
       {isMobile && (
@@ -430,7 +423,7 @@ const Dashboard = () => {
       )}
 
         {/* Main Content */}
-        <main className={`${isMobile ? 'pb-20' : 'ml-64'} min-h-screen bg-[#0B0C10]`}>
+        <main className={`${isMobile ? 'pb-20' : 'ml-24'} min-h-screen bg-[#0B0C10]`}>
 
         {/* Content Area */}
         <div className="p-4 md:p-6">
@@ -460,7 +453,29 @@ const Dashboard = () => {
               </div>
 
               {/* Category Filter */}
-              <div className="flex space-x-2 overflow-x-auto pb-2">
+              <style>
+                {`
+                  .filter-scroll::-webkit-scrollbar { display: none; }
+                  @keyframes campfire {
+                    0%, 100% {
+                      box-shadow: 0 4px 6px -2px rgba(255, 215, 0, 0.1), 0 2px 4px -1px rgba(255, 255, 0, 0.05);
+                    }
+                    25% {
+                      box-shadow: 0 10px 20px -5px rgba(255, 215, 0, 0.15), 0 5px 10px -3px rgba(255, 255, 0, 0.1);
+                    }
+                    50% {
+                      box-shadow: 0 25px 50px -12px rgba(255, 215, 0, 0.25), 0 15px 30px -8px rgba(255, 255, 0, 0.2);
+                    }
+                    75% {
+                      box-shadow: 0 15px 30px -8px rgba(255, 215, 0, 0.2), 0 8px 15px -4px rgba(255, 255, 0, 0.15);
+                    }
+                  }
+                  .campfire-animation {
+                    animation: campfire 8s ease-in-out infinite;
+                  }
+                `}
+              </style>
+              <div className="flex space-x-2 overflow-x-auto pb-2 filter-scroll">
                 <button
                   onClick={() => handleCategoryChange('all')}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
@@ -751,81 +766,95 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+      </main>
 
-        {/* Mobile Bottom Navigation */}
-        {isMobile && (
-          <nav className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/3 border-t border-white/10 px-4 py-3 safe-area-inset-bottom z-50 shadow-2xl">
-            <div className="flex items-center justify-around">
-              {mobileNavItems.slice(0, 4).map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex flex-col items-center px-3 py-2 rounded-lg transition-colors ${
-                    activeTab === item.id
-                      ? 'text-yellow-400 bg-yellow-500/20'
-                      : 'text-gray-400 hover:text-gray-200'
-                  }`}
-                >
-                  <item.icon className={`w-6 h-6 mb-1 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
-                  <span className="text-xs font-medium">{item.label}</span>
-                </button>
-              ))}
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <nav className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-white/20 border border-white/20 px-4 py-3 rounded-full safe-area-inset-bottom z-50 shadow-2xl">
+          <div className="flex items-center justify-around">
+            {mobileNavItems.slice(0, 4).map((item) => (
               <button
-                onClick={() => setMobileMenuOpen(true)}
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
                 className={`flex flex-col items-center px-3 py-2 rounded-lg transition-colors ${
-                  mobileMenuOpen
+                  activeTab === item.id
                     ? 'text-yellow-400 bg-yellow-500/20'
                     : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
-                <Menu className="w-6 h-6 mb-1" />
-                <span className="text-xs font-medium">More</span>
+                <item.icon className={`w-6 h-6 mb-1 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
+                <span className="text-xs font-medium">{item.label}</span>
               </button>
-            </div>
-          </nav>
-        )}
+            ))}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className={`flex flex-col items-center px-3 py-2 rounded-lg transition-colors ${
+                mobileMenuOpen
+                  ? 'text-yellow-400 bg-yellow-500/20'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <Menu className="w-6 h-6 mb-1" />
+              <span className="text-xs font-medium">More</span>
+            </button>
+          </div>
+        </nav>
+      )}
 
-        {/* Mobile More Menu */}
-        <AnimatePresence>
-          {isMobile && mobileMenuOpen && (
-            <>
-              <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setMobileMenuOpen(false)} />
-              <div className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/3 rounded-t-2xl z-50 p-6 safe-area-inset-bottom border-t border-white/10">
-                <div className="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6" />
-                <h3 className="text-lg font-semibold text-white mb-4">More Options</h3>
-                <div className="space-y-3">
-                  {navigationItems.slice(4).map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-                        activeTab === item.id
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : 'text-gray-300 hover:bg-gray-700/50'
-                      }`}
-                    >
-                      <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
-                      <span className="font-medium">{item.label}</span>
-                    </button>
-                  ))}
+      {/* Mobile More Menu */}
+      <AnimatePresence>
+        {isMobile && mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/3 rounded-t-2xl z-50 p-6 safe-area-inset-bottom border-t border-white/10"
+            >
+              <div className="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6" />
+              <h3 className="text-lg font-semibold text-white mb-4">More Options</h3>
+              <div className="space-y-3">
+                {navigationItems.slice(4).map((item) => (
                   <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
+                      activeTab === item.id
+                        ? 'bg-yellow-500/20 text-yellow-400'
+                        : 'text-gray-300 hover:bg-gray-700/50'
+                    }`}
                   >
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium">Logout</span>
+                    <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-yellow-400' : 'text-gray-400'}`} />
+                    <span className="font-medium">{item.label}</span>
                   </button>
-                </div>
+                ))}
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="font-medium">Logout</span>
+                </button>
               </div>
-            </>
-          )}
-        </AnimatePresence>
-      </main>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
-  );
+  </>
+);
 };
 
 export default Dashboard;
