@@ -3,6 +3,7 @@ import { Star, MapPin, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Machine } from "@/data/machines";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   machine: Machine;
@@ -13,6 +14,31 @@ interface Props {
 
 const MachineCard = ({ machine, index, onBook, showBookButton = true }: Props) => {
   const [liked, setLiked] = useState(false);
+  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const navigate = useNavigate();
+
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const newRipple = { id: Date.now(), x, y };
+
+    setRipples(prev => [...prev, newRipple]);
+
+    // Remove ripple after animation
+    setTimeout(() => {
+      setRipples(prev => prev.filter(ripple => ripple.id !== newRipple.id));
+    }, 600);
+
+    // Store current scroll position before navigation
+    const currentPath = window.location.pathname;
+    sessionStorage.setItem(`scrollPos_${currentPath}`, window.scrollY.toString());
+
+    // Navigate after a short delay for visual feedback
+    setTimeout(() => {
+      navigate(`/product/${machine.id}`);
+    }, 150);
+  };
 
   return (
     <motion.div
@@ -26,10 +52,16 @@ const MachineCard = ({ machine, index, onBook, showBookButton = true }: Props) =
         stiffness: 100
       }}
       whileHover={{
-        y: -8,
+        y: -12,
+        scale: 1.02,
         transition: { duration: 0.3, ease: "easeOut" }
       }}
-      className="glass-card overflow-hidden group cursor-pointer border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 h-full"
+      whileTap={{
+        scale: 0.98,
+        transition: { duration: 0.1 }
+      }}
+      onClick={handleCardClick}
+      className="glass-strong overflow-hidden group cursor-pointer border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 h-full relative before:absolute before:inset-0 before:rounded-xl before:p-[1px] before:bg-gradient-to-r before:from-transparent before:via-primary/20 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500 before:-z-10"
     >
       <div className="relative overflow-hidden h-48 sm:h-56 md:h-64 lg:h-72 xl:h-80 2xl:h-64 group">
         {/* Premium image with enhanced effects */}
@@ -39,8 +71,20 @@ const MachineCard = ({ machine, index, onBook, showBookButton = true }: Props) =
           loading="lazy"
           width={800}
           height={600}
-          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
-          whileHover={{ scale: 1.1 }}
+          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+          style={{
+            filter: 'blur(0px)',
+            transition: 'filter 0.3s ease-out'
+          }}
+          onLoad={(e) => {
+            // Remove blur once image is loaded
+            e.currentTarget.style.filter = 'blur(0px)';
+          }}
+          whileHover={{
+            scale: 1.1,
+            filter: "brightness(1.1) saturate(1.1) blur(0px)",
+            transition: { duration: 0.4, ease: "easeOut" }
+          }}
         />
 
         {/* Multi-layer overlays */}
@@ -75,8 +119,11 @@ const MachineCard = ({ machine, index, onBook, showBookButton = true }: Props) =
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={() => setLiked(!liked)}
-          className="absolute top-4 right-4 p-3 rounded-full glass-card border border-white/20 shadow-xl hover:shadow-primary/20 transition-all duration-300"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card click
+            setLiked(!liked);
+          }}
+          className="absolute top-4 right-4 p-3 rounded-full glass-strong border border-white/20 shadow-xl hover:shadow-primary/20 transition-all duration-300"
         >
           <Heart className={`h-5 w-5 transition-all duration-300 ${
             liked
@@ -84,6 +131,26 @@ const MachineCard = ({ machine, index, onBook, showBookButton = true }: Props) =
               : "text-white/80 hover:text-white"
           }`} />
         </motion.button>
+
+        {/* Ripple effects */}
+        {ripples.map(ripple => (
+          <motion.div
+            key={ripple.id}
+            className="absolute pointer-events-none rounded-full bg-white/30"
+            style={{
+              left: ripple.x - 10,
+              top: ripple.y - 10,
+              width: 20,
+              height: 20,
+            }}
+            initial={{ scale: 0, opacity: 1 }}
+            animate={{
+              scale: 20,
+              opacity: 0,
+              transition: { duration: 0.6, ease: "easeOut" }
+            }}
+          />
+        ))}
 
         {/* Premium overlay text */}
         <div className="absolute bottom-4 left-4 right-4">
@@ -114,10 +181,26 @@ const MachineCard = ({ machine, index, onBook, showBookButton = true }: Props) =
         </div>
 
         <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 xl:gap-4 mb-3 sm:mb-4 md:mb-5 lg:mb-6 xl:mb-7">
-          {Object.entries(machine.specs).slice(0, 3).map(([key, val]) => (
-            <span key={key} className="px-1.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 py-0.5 sm:py-1 md:py-1.5 lg:py-2 xl:py-2.5 rounded-md bg-secondary text-xs sm:text-sm md:text-sm lg:text-base xl:text-lg text-secondary-foreground">
+          {Object.entries(machine.specs).slice(0, 3).map(([key, val], i) => (
+            <motion.span
+              key={key}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.8 + i * 0.1,
+                type: "spring",
+                stiffness: 200
+              }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: "hsl(var(--primary) / 0.1)",
+                transition: { duration: 0.2 }
+              }}
+              className="px-1.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 py-0.5 sm:py-1 md:py-1.5 lg:py-2 xl:py-2.5 rounded-md bg-secondary text-xs sm:text-sm md:text-sm lg:text-base xl:text-lg text-secondary-foreground cursor-pointer transition-colors duration-200"
+            >
               {key}: {val}
-            </span>
+            </motion.span>
           ))}
         </div>
 

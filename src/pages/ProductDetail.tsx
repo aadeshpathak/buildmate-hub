@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMachine } from "@/hooks/useMachine";
 import { useIsMobile } from "@/hooks/use-mobile";
+import PageTransition from "@/components/PageTransition";
 
 // Clean minimal animations
 const smoothAnimations = {
@@ -79,12 +80,128 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br from-background via-background to-card/20 ${isMobile ? 'overflow-x-hidden' : ''} flex items-center justify-center`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-6"></div>
-          <p className="text-muted-foreground">Loading equipment details...</p>
+      <PageTransition>
+        <div className={`min-h-screen bg-gradient-to-br from-background via-background to-card/20 ${isMobile ? 'overflow-x-hidden' : ''}`}>
+          {/* Header skeleton */}
+          <header className={`sticky top-0 z-40 backdrop-blur-xl bg-white/3 border-b border-white/10 ${isMobile ? 'safe-area-inset-top' : ''}`}>
+            <div className={`max-w-7xl mx-auto ${isMobile ? 'px-4 py-4' : 'px-6 py-4'}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-muted/20 animate-pulse">
+                    <div className="h-5 w-5 bg-muted-foreground/30 rounded"></div>
+                  </div>
+                  <div>
+                    <div className="h-6 w-32 bg-muted/40 rounded animate-pulse mb-1"></div>
+                    <div className="h-4 w-24 bg-muted/30 rounded animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-muted/20 animate-pulse">
+                    <div className="h-5 w-5 bg-muted-foreground/30 rounded"></div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/20 animate-pulse">
+                    <div className="h-5 w-5 bg-muted-foreground/30 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div className={`max-w-7xl mx-auto ${isMobile ? 'px-4 py-6 pb-32' : 'px-6 py-8'}`}>
+            <div className={`grid grid-cols-1 ${isMobile ? 'gap-6' : 'lg:grid-cols-2 gap-12'}`}>
+              {/* Image skeleton */}
+              <div className="space-y-4">
+                <div className={`rounded-2xl overflow-hidden bg-muted/20 ${isMobile ? 'aspect-[4/3]' : 'aspect-square'} animate-pulse`} />
+              </div>
+
+              {/* Content skeleton */}
+              <div className="bg-white/3 backdrop-blur-xl rounded-2xl p-6 border border-white/10 space-y-6">
+                {/* Category badge */}
+                <div className="h-8 w-24 bg-muted/30 rounded-full animate-pulse"></div>
+
+                {/* Title */}
+                <div className="space-y-2">
+                  <div className="h-8 w-3/4 bg-muted/40 rounded animate-pulse"></div>
+                  <div className="h-4 w-1/2 bg-muted/30 rounded animate-pulse"></div>
+                </div>
+
+                {/* Rating and location */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <div className="h-4 w-4 bg-muted/40 rounded animate-pulse"></div>
+                    <div className="h-4 w-8 bg-muted/30 rounded animate-pulse"></div>
+                    <div className="h-4 w-12 bg-muted/30 rounded animate-pulse"></div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-4 w-4 bg-muted/40 rounded animate-pulse"></div>
+                    <div className="h-4 w-16 bg-muted/30 rounded animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <div className="h-4 w-full bg-muted/20 rounded animate-pulse"></div>
+                  <div className="h-4 w-4/5 bg-muted/20 rounded animate-pulse"></div>
+                  <div className="h-4 w-3/4 bg-muted/20 rounded animate-pulse"></div>
+                </div>
+
+                {/* Pricing section */}
+                <div className="bg-white/3 backdrop-blur-xl rounded-xl p-6 border border-white/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="h-4 w-24 bg-muted/30 rounded animate-pulse mb-2"></div>
+                      <div className="flex items-baseline gap-2">
+                        <div className="h-8 w-32 bg-primary/20 rounded animate-pulse"></div>
+                        <div className="h-4 w-16 bg-muted/30 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="h-4 w-20 bg-green-500/20 rounded animate-pulse mb-1"></div>
+                      <div className="h-3 w-24 bg-muted/30 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="h-12 bg-muted/20 rounded-lg animate-pulse"></div>
+                      <div className="h-12 bg-muted/20 rounded-lg animate-pulse"></div>
+                    </div>
+                    <div className="h-14 bg-primary/20 rounded-lg animate-pulse"></div>
+                    <div className="h-12 bg-muted/20 rounded-lg animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Specs section */}
+                <div className="bg-white/3 backdrop-blur-xl rounded-xl p-6 border border-white/10 space-y-4">
+                  <div className="h-6 w-40 bg-muted/40 rounded animate-pulse"></div>
+                  <div className="grid grid-cols-1 gap-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="flex justify-between items-center py-2 px-3 bg-muted/20 rounded-lg animate-pulse">
+                        <div className="h-4 w-20 bg-muted/30 rounded"></div>
+                        <div className="h-4 w-16 bg-muted/40 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Features section */}
+                <div className="bg-white/3 backdrop-blur-xl rounded-xl p-6 border border-white/10 space-y-3">
+                  <div className="h-6 w-24 bg-muted/40 rounded animate-pulse"></div>
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 animate-pulse">
+                        <div className="h-4 w-4 bg-green-400/30 rounded"></div>
+                        <div className="h-4 w-48 bg-muted/20 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </PageTransition>
     );
   }
 
@@ -98,7 +215,7 @@ const ProductDetail = () => {
           <div>
             <h2 className="text-2xl font-bold text-white mb-2">Equipment Not Found</h2>
             <p className="text-slate-400 mb-6">The equipment you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={() => navigate('/dashboard')} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => navigate(-1)} className="bg-blue-600 hover:bg-blue-700">
               Browse All Equipment
             </Button>
           </div>
@@ -108,7 +225,8 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0C10] relative overflow-hidden">
+    <PageTransition>
+      <div className="min-h-screen bg-[#0B0C10] relative overflow-hidden">
       {/* Subtle radial gradients for depth */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
@@ -120,7 +238,7 @@ const ProductDetail = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate(-1)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -351,7 +469,7 @@ const ProductDetail = () => {
             {mobileNavItems.slice(0, 4).map((item) => (
               <button
                 key={item.id}
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate(-1)}
                 className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-400 hover:text-gray-200"
               >
                 <item.icon className="w-5 h-5 mb-1" />
@@ -398,7 +516,7 @@ const ProductDetail = () => {
                   <button
                     key={item.id}
                     onClick={() => {
-                      navigate('/dashboard');
+                      navigate(-1);
                       setMobileMenuOpen(false);
                     }}
                     className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-gray-700/50 transition-colors"
@@ -412,7 +530,7 @@ const ProductDetail = () => {
                     sessionStorage.removeItem('adminAuth');
                     localStorage.removeItem('buildmate_wishlist');
                     localStorage.removeItem('buildmate_bookings');
-                    navigate('/');
+                    navigate(-1);
                   }}
                   className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
                 >
@@ -424,7 +542,8 @@ const ProductDetail = () => {
           </>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </PageTransition>
   );
 };
 

@@ -6,19 +6,22 @@ import MachinesSection from "@/components/MachinesSection";
 import HowItWorks from "@/components/HowItWorks";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
+import PageTransition from "@/components/PageTransition";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <HeroSection />
-      <FloatingConnectionBridge />
-      <CategoriesSection />
-      <MachinesSection />
-      <HowItWorks />
-      <CTASection />
-      <Footer />
-    </div>
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <HeroSection />
+        <FloatingConnectionBridge />
+        <CategoriesSection />
+        <MachinesSection />
+        <HowItWorks />
+        <CTASection />
+        <Footer />
+      </div>
+    </PageTransition>
   );
 };
 

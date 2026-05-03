@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import MachineCard from "./MachineCard";
+import MachineCardSkeleton from "./MachineCardSkeleton";
 import BookingModal from "./BookingModal";
 import { useMachines } from "@/hooks/useMachines";
 import { type Machine } from "@/data/machines";
@@ -226,9 +227,10 @@ const MachinesSection = () => {
         </div>
 
         {loading && (
-          <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading machines...</p>
+          <div className="hidden md:grid grid-cols-3 gap-6 lg:gap-8 xl:gap-10">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <MachineCardSkeleton key={i} />
+            ))}
           </div>
         )}
 
@@ -242,32 +244,44 @@ const MachinesSection = () => {
           <>
             {/* Mobile Carousel */}
             <div className="block md:hidden">
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: false,
-                  dragFree: false,
-                  containScroll: "trimSnaps",
-                }}
-                setApi={setCarouselApi}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2 md:-ml-4">
-                  {carouselMachines.map((machine, i) => (
-                    <CarouselItem key={machine.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-[75%] lg:basis-[60%]">
+              {loading ? (
+                <div className="flex gap-4 overflow-x-hidden">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex-shrink-0 w-[85%] sm:w-[75%]">
                       <div className="p-1">
-                        <MachineCard machine={machine} index={i} onBook={setSelectedMachine} showBookButton={false} />
+                        <MachineCardSkeleton />
                       </div>
-                    </CarouselItem>
+                    </div>
                   ))}
-                </CarouselContent>
-                {carouselMachines.length > 1 && (
-                  <>
-                    <CarouselPrevious className="left-2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10" />
-                    <CarouselNext className="right-2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10" />
-                  </>
-                )}
-              </Carousel>
+                </div>
+              ) : (
+                <Carousel
+                  opts={{
+                    align: "start",
+                    loop: false,
+                    dragFree: false,
+                    containScroll: "trimSnaps",
+                  }}
+                  setApi={setCarouselApi}
+                  className="w-full"
+                >
+                  <CarouselContent className="-ml-2 md:-ml-4">
+                    {carouselMachines.map((machine, i) => (
+                      <CarouselItem key={machine.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-[75%] lg:basis-[60%]">
+                        <div className="p-1">
+                          <MachineCard machine={machine} index={i} onBook={setSelectedMachine} showBookButton={false} />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {carouselMachines.length > 1 && (
+                    <>
+                      <CarouselPrevious className="left-2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10" />
+                      <CarouselNext className="right-2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10" />
+                    </>
+                  )}
+                </Carousel>
+              )}
             </div>
 
             {/* Desktop Grid */}
@@ -278,9 +292,65 @@ const MachinesSection = () => {
             </div>
 
             {filtered.length === 0 && (
-              <div className="text-center py-16 text-muted-foreground">
-                No machines found matching your search.
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-20"
+              >
+                <div className="max-w-md mx-auto">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="w-24 h-24 bg-gradient-to-br from-muted/20 to-muted/40 rounded-full flex items-center justify-center mx-auto mb-6"
+                  >
+                    <motion.div
+                      animate={{
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="text-4xl"
+                    >
+                      🔍
+                    </motion.div>
+                  </motion.div>
+                  <h3 className="text-2xl font-semibold text-foreground mb-3">
+                    No machines found
+                  </h3>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                    We couldn't find any equipment matching your search criteria.
+                    Try adjusting your filters or search terms.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      onClick={() => {
+                        setActiveFilter("All");
+                        setSearch("");
+                        setLocalSearch("");
+                      }}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
+                      Clear Filters
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearch("");
+                        setLocalSearch("");
+                      }}
+                      className="border-border hover:bg-accent"
+                    >
+                      Clear Search
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
             )}
           </>
         )}

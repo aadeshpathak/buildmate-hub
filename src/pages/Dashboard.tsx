@@ -216,6 +216,12 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+
+  const handleViewDetails = (machineId: string) => {
+    // Store current scroll position before navigation
+    sessionStorage.setItem(`scrollPos_${window.location.pathname}`, window.scrollY.toString());
+    navigate(`/product/${machineId}`);
+  };
   // Always load all machines for dashboard category sections
   const { machines, loading: machinesLoading, loadedCount, hasMore } = useMachines('', 'all');
 
@@ -535,7 +541,7 @@ const Dashboard = () => {
                                     index={index}
                                     isWishlisted={wishlist.includes(machine.id)}
                                     onToggleWishlist={toggleWishlist}
-                                    onViewDetails={() => navigate(`/product/${machine.id}`)}
+                                    onViewDetails={() => handleViewDetails(machine.id)}
                                   />
                                 ))}
                               </div>
@@ -592,7 +598,7 @@ const Dashboard = () => {
                             machines={machinesByCategory[category]?.slice(0, 6) || []}
                             wishlist={wishlist}
                             onToggleWishlist={toggleWishlist}
-                            onViewDetails={(id) => navigate(`/product/${id}`)}
+                            onViewDetails={(id) => handleViewDetails(id)}
                             onViewAll={() => handleViewAll(category)}
                           />
                         ));
@@ -605,7 +611,7 @@ const Dashboard = () => {
                             machines={machinesByCategory[selectedCategory]?.slice(0, 6) || []}
                             wishlist={wishlist}
                             onToggleWishlist={toggleWishlist}
-                            onViewDetails={(id) => navigate(`/product/${id}`)}
+                            onViewDetails={(id) => handleViewDetails(id)}
                             onViewAll={() => handleViewAll(selectedCategory)}
                           />
                         ) : null;
@@ -639,7 +645,7 @@ const Dashboard = () => {
                             index={index}
                             isWishlisted={wishlist.includes(machine.id)}
                             onToggleWishlist={toggleWishlist}
-                            onViewDetails={() => navigate(`/product/${machine.id}`)}
+                            onViewDetails={() => handleViewDetails(machine.id)}
                           />
                         ))}
                       </div>
@@ -681,7 +687,7 @@ const Dashboard = () => {
                         index={index}
                         isWishlisted={true}
                         onToggleWishlist={toggleWishlist}
-                        onViewDetails={() => navigate(`/product/${machine.id}`)}
+                        onViewDetails={() => handleViewDetails(machine.id)}
                       />
                     ))}
                 </div>
