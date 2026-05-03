@@ -8,9 +8,10 @@ interface Props {
   machine: Machine;
   index: number;
   onBook: (machine: Machine) => void;
+  showBookButton?: boolean;
 }
 
-const MachineCard = ({ machine, index, onBook }: Props) => {
+const MachineCard = ({ machine, index, onBook, showBookButton = true }: Props) => {
   const [liked, setLiked] = useState(false);
 
   return (
@@ -120,36 +121,38 @@ const MachineCard = ({ machine, index, onBook }: Props) => {
           ))}
         </div>
 
-        <div className="flex items-end justify-between pt-3 sm:pt-4 md:pt-5 lg:pt-6 xl:pt-6 border-t border-primary/10 bg-gradient-to-r from-primary/5 to-transparent px-4 sm:px-6 md:px-5 lg:px-6 xl:px-6 pb-4 sm:pb-6 md:pb-5 lg:pb-6 xl:pb-6 mt-auto">
-          <div className="space-y-0.5 sm:space-y-1 md:space-y-1.5 lg:space-y-2 xl:space-y-2">
-                <div className="flex items-baseline gap-1 sm:gap-2 md:gap-2 lg:gap-2 xl:gap-2">
-                  <span className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-3xl font-black text-gradient">₹{machine.pricePerHour.toLocaleString()}</span>
-                  <span className="text-xs sm:text-sm md:text-sm lg:text-xs xl:text-xs text-muted-foreground font-medium">per hour</span>
-                </div>
-                <div className="flex items-baseline gap-1 sm:gap-2 md:gap-2 lg:gap-2 xl:gap-2">
-                  <span className="text-sm sm:text-lg md:text-xl lg:text-xl xl:text-xl font-bold text-primary/80">₹{machine.pricePerDay.toLocaleString()}</span>
-                  <span className="text-xs sm:text-sm md:text-sm lg:text-xs xl:text-xs text-muted-foreground">per day</span>
-                </div>
-          </div>
+        {showBookButton && (
+          <div className="flex items-end justify-between pt-3 sm:pt-4 md:pt-5 lg:pt-6 xl:pt-6 border-t border-primary/10 bg-gradient-to-r from-primary/5 to-transparent px-4 sm:px-6 md:px-5 lg:px-6 xl:px-6 pb-4 sm:pb-6 md:pb-5 lg:pb-6 xl:pb-6 mt-auto">
+            <div className="space-y-0.5 sm:space-y-1 md:space-y-1.5 lg:space-y-2 xl:space-y-2">
+                  <div className="flex items-baseline gap-1 sm:gap-2 md:gap-2 lg:gap-2 xl:gap-2">
+                    <span className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-3xl font-black text-gradient">₹{machine.pricePerHour.toLocaleString()}</span>
+                    <span className="text-xs sm:text-sm md:text-sm lg:text-xs xl:text-xs text-muted-foreground font-medium">per hour</span>
+                  </div>
+                  <div className="flex items-baseline gap-1 sm:gap-2 md:gap-2 lg:gap-2 xl:gap-2">
+                    <span className="text-sm sm:text-lg md:text-xl lg:text-xl xl:text-xl font-bold text-primary/80">₹{machine.pricePerDay.toLocaleString()}</span>
+                    <span className="text-xs sm:text-sm md:text-sm lg:text-xs xl:text-xs text-muted-foreground">per day</span>
+                  </div>
+            </div>
 
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Button
-              size="sm"
-              disabled={!machine.available}
-              onClick={() => onBook(machine)}
-              className={`font-bold px-4 sm:px-6 md:px-8 lg:px-6 xl:px-8 py-2 sm:py-3 md:py-3 lg:py-2 xl:py-3 rounded-xl transition-all duration-300 shadow-lg text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl ${
-                machine.available
-                  ? 'bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-white glow-primary hover:shadow-primary/25'
-                  : 'bg-muted text-muted-foreground cursor-not-allowed'
-              }`}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {machine.available ? 'Book Now' : 'Unavailable'}
-            </Button>
-          </motion.div>
-        </div>
+              <Button
+                size="sm"
+                disabled={!machine.available}
+                onClick={() => onBook(machine)}
+                className={`font-bold px-4 sm:px-6 md:px-8 lg:px-6 xl:px-8 py-2 sm:py-3 md:py-3 lg:py-2 xl:py-3 rounded-xl transition-all duration-300 shadow-lg text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl ${
+                  machine.available
+                    ? 'bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-500/90 text-white glow-primary hover:shadow-primary/25'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                }`}
+              >
+                {machine.available ? 'Book Now' : 'Unavailable'}
+              </Button>
+            </motion.div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

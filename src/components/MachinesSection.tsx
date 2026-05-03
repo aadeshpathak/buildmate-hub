@@ -4,9 +4,9 @@ import { useInView } from "react-intersection-observer";
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import MachineCard from "./MachineCard";
 import BookingModal from "./BookingModal";
-import { useMobileCarousel } from "@/hooks/useCarousel";
 import { useMachines } from "@/hooks/useMachines";
 import { type Machine } from "@/data/machines";
 import { useLocation } from "react-router-dom";
@@ -27,6 +27,7 @@ const MachinesSection = () => {
   const [localSearch, setLocalSearch] = useState(search);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
 
   const { machines, loading, error } = useMachines();
 
@@ -69,6 +70,13 @@ const MachinesSection = () => {
       }, 300);
     }
   }, [activeFilter, loading, machines.length, location.search]);
+
+  // Reset carousel to beginning when filter changes
+  useEffect(() => {
+    if (carouselApi) {
+      carouselApi.scrollTo(0);
+    }
+  }, [activeFilter, carouselApi]);
 
   // Debounced search update - only update after user stops typing
   const handleSearchChange = useCallback((value: string) => {
@@ -145,8 +153,8 @@ const MachinesSection = () => {
   // Debug: Log current filter and search
   console.log('Active filter:', activeFilter, 'Search:', search, 'Filtered count:', filtered.length);
 
-  const carouselItems = filtered.length > 5 ? Math.max(1, filtered.length - 4) : 1;
-  const carousel = useMobileCarousel(carouselItems);
+  // Limit to 5 machines for carousel display
+  const carouselMachines = filtered.slice(0, 5);
 
   return (
     <section id="machines" className="section-padding relative" ref={ref}>
@@ -233,67 +241,33 @@ const MachinesSection = () => {
         {!loading && !error && (
           <>
             {/* Mobile Carousel */}
-            <div className="block md:hidden relative overflow-hidden">
-              <div
-                ref={carousel.containerRef}
-                className="flex transition-transform duration-300 ease-out"
-                style={{
-                  transform: carousel.transform,
-                  width: `${carousel.totalWidth}px`
+            <div className="block md:hidden">
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: false,
+                  dragFree: false,
+                  containScroll: "trimSnaps",
                 }}
+                setApi={setCarouselApi}
+                className="w-full"
               >
-                {filtered.slice(carousel.activeIndex, carousel.activeIndex + 5).map((machine, i) => (
-                  <div
-                    key={machine.id}
-                    className="flex-none"
-                    style={{
-                      width: `${Math.min(280, (carousel.containerRef.current?.clientWidth || 320) - 32)}px`,
-                      marginRight: '16px'
-                    }}
-                  >
-                    <MachineCard machine={machine} index={carousel.activeIndex + i} onBook={setSelectedMachine} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Carousel Navigation */}
-              {filtered.length > 1 && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10"
-                    onClick={carousel.goToPrev}
-                    disabled={!carousel.canGoPrev}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10"
-                    onClick={carousel.goToNext}
-                    disabled={!carousel.canGoNext}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-
-                  {/* Dots Indicator */}
-                  {carouselItems > 1 && (
-                    <div className="flex justify-center gap-2 mt-4">
-                      {Array.from({ length: carouselItems }, (_, i) => (
-                        <button
-                          key={i}
-                          className={`w-2 h-2 rounded-full transition-colors ${
-                            i === carousel.activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'
-                          }`}
-                          onClick={() => carousel.scrollToIndex(i)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {carouselMachines.map((machine, i) => (
+                    <CarouselItem key={machine.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-[75%] lg:basis-[60%]">
+                      <div className="p-1">
+                        <MachineCard machine={machine} index={i} onBook={setSelectedMachine} showBookButton={false} />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {carouselMachines.length > 1 && (
+                  <>
+                    <CarouselPrevious className="left-2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10" />
+                    <CarouselNext className="right-2 bg-background/80 backdrop-blur-sm border-border shadow-lg h-10 w-10" />
+                  </>
+                )}
+              </Carousel>
             </div>
 
             {/* Desktop Grid */}
