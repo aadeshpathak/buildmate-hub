@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
 import "@/lib/firebase"; // Initialize Firebase
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -18,56 +17,62 @@ const ScrollManager = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Store scroll position on every route change (except when coming back from product detail)
+    // Store scroll position on every route change
     const handleScroll = () => {
-      if (!location.pathname.startsWith('/product/')) {
+      try {
         sessionStorage.setItem(`scrollPos_${location.pathname}`, window.scrollY.toString());
+      } catch (e) {
+        // Ignore storage errors
       }
     };
 
-    // Add scroll listener
     window.addEventListener('scroll', handleScroll);
 
-    // Restore scroll position for non-product pages
+    // Restore scroll position only for non-product pages (dashboard, index, etc.)
+    // Product detail pages should always start at top
     if (!location.pathname.startsWith('/product/')) {
-      const savedScrollPos = sessionStorage.getItem(`scrollPos_${location.pathname}`);
-      if (savedScrollPos && parseInt(savedScrollPos, 10) > 0) {
-        // Small delay to ensure page is rendered
-        setTimeout(() => {
-          window.scrollTo({ top: parseInt(savedScrollPos, 10), behavior: 'instant' });
-        }, 50);
-      } else {
-        window.scrollTo({ top: 0, behavior: 'instant' });
+      const deferFlag = sessionStorage.getItem(`scrollDefer_${location.pathname}`);
+      if (!deferFlag) {
+        const savedScrollPos = sessionStorage.getItem(`scrollPos_${location.pathname}`);
+        if (savedScrollPos && parseInt(savedScrollPos, 10) > 0) {
+          setTimeout(() => {
+            window.scrollTo({ top: parseInt(savedScrollPos, 10), behavior: 'instant' });
+          }, 50);
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       }
     }
+    // For product pages: explicitly ensure top position (no restoration)
+    else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
 
-    // Store scroll position when component unmounts (navigation away)
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (!location.pathname.startsWith('/product/')) {
-        sessionStorage.setItem(`scrollPos_${location.pathname}`, window.scrollY.toString());
+        try {
+          sessionStorage.setItem(`scrollPos_${location.pathname}`, window.scrollY.toString());
+        } catch (e) {
+          // Ignore storage errors
+        }
       }
     };
-  }, [location.pathname]); // Only depend on pathname to avoid unnecessary re-runs
+  }, [location.pathname]);
 
   return null;
 };
 
 const AnimatedRoutes = () => {
-  const location = useLocation();
-
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Index />} />
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AnimatePresence>
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/admin" element={<AdminLogin />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/admin/dashboard" element={<Dashboard />} />
+      <Route path="/product/:id" element={<ProductDetail />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 

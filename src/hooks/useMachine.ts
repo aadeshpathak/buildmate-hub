@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getMachineById, type Machine } from '@/services/machineService';
+import { loadMachines } from '@/data/machines';
 
 export const useMachine = (id: string | undefined) => {
   const [machine, setMachine] = useState<Machine | null>(null);
@@ -20,14 +21,39 @@ export const useMachine = (id: string | undefined) => {
         setError(null);
         const machineData = await getMachineById(id);
 
-        if (isMounted) {
+        // If Firestore returned no data, fall back to local file
+        if (!machineData) {
+          console.log('No machine from Firestore, falling back to local data...');
+          try {
+            const allMachines = await loadMachines();
+            const localMachine = allMachines.find(m => m.id === id) || null;
+            if (isMounted) {
+              setMachine(localMachine);
+            }
+          } catch (fallbackErr) {
+            console.error('Local fallback failed:', fallbackErr);
+            if (isMounted) {
+              setMachine(null);
+            }
+          }
+        } else if (isMounted) {
           setMachine(machineData);
         }
       } catch (err) {
-        console.error('Error fetching machine:', err);
-        if (isMounted) {
-          setError('Failed to connect to Firebase. Please check your internet connection and Firebase configuration.');
-          setMachine(null);
+        console.error('Error fetching machine from Firebase, trying file fallback:', err);
+        try {
+          const allMachines = await loadMachines();
+          const fallbackMachine = allMachines.find(m => m.id === id) || null;
+          if (isMounted) {
+            setMachine(fallbackMachine);
+            setError(null);
+          }
+        } catch (fallbackErr) {
+          console.error('File fallback also failed:', fallbackErr);
+          if (isMounted) {
+            setError('Failed to load machine details. Please check your connection.');
+            setMachine(null);
+          }
         }
       } finally {
         if (isMounted) {

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Heart, Share, Star, MapPin, ShoppingCart, MessageCircle, AlertCircle, Calendar, Clock, Shield, CheckCircle, Home, User, Menu, LogOut } from "lucide-react";
+import { ArrowLeft, Heart, Share, Star, MapPin, ShoppingCart, MessageCircle, AlertCircle, Calendar, Clock, Shield, CheckCircle, Home, User, Menu, LogOut, CreditCard, Bell, Phone, Link, Copy, Globe, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMachine } from "@/hooks/useMachine";
 import { useIsMobile } from "@/hooks/use-mobile";
 import PageTransition from "@/components/PageTransition";
+import BookingModal from "@/components/BookingModal";
+import { toast } from "sonner";
 
 // Clean minimal animations
 const smoothAnimations = {
@@ -43,23 +45,9 @@ const ProductDetail = () => {
   const isMobile = useIsMobile();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Mobile Bottom Navigation Items
-  const mobileNavItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'wishlist', label: 'Wishlist', icon: Heart },
-    { id: 'bookings', label: 'Bookings', icon: ShoppingCart },
-    { id: 'account', label: 'Account', icon: User }
-  ];
-
-  // Load wishlist from localStorage
-  useEffect(() => {
-    const savedWishlist = localStorage.getItem('buildmate_wishlist');
-    if (savedWishlist) {
-      const wishlist = JSON.parse(savedWishlist);
-      setIsWishlisted(wishlist.includes(id));
-    }
-  }, [id]);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
 
   // Toggle wishlist
   const toggleWishlist = () => {
@@ -74,6 +62,22 @@ const ProductDetail = () => {
 
     localStorage.setItem('buildmate_wishlist', JSON.stringify(wishlist));
     setIsWishlisted(!isWishlisted);
+  };
+
+  // Handle booking
+  const handleBooking = () => {
+    if (!machine || !machine.available) return;
+    setBookingModalOpen(true);
+  };
+
+  // Handle share
+  const handleShare = () => {
+    setShareModalOpen(true);
+  };
+
+  // Handle contact owner
+  const handleContactOwner = () => {
+    setContactModalOpen(true);
   };
 
   const { machine, loading, error } = useMachine(id);
@@ -225,10 +229,11 @@ const ProductDetail = () => {
   }
 
   return (
-    <PageTransition>
-      <div className="min-h-screen bg-[#0B0C10] relative overflow-hidden">
+    <>
+      <PageTransition>
+        <div className="min-h-screen bg-[#0B0C10] relative overflow-hidden">
       {/* Subtle radial gradients for depth */}
-      <div className="absolute inset-0 opacity-5">
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
       </div>
@@ -258,7 +263,9 @@ const ProductDetail = () => {
               >
                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
               </button>
-              <button className="p-2 text-gray-400 hover:bg-gray-700/50 rounded-lg transition-colors">
+              <button
+                onClick={handleShare}
+                className="p-2 text-gray-400 hover:bg-gray-700/50 rounded-lg transition-colors">
                 <Share className="w-5 h-5" />
               </button>
             </div>
@@ -388,20 +395,27 @@ const ProductDetail = () => {
                     {isWishlisted ? 'Wishlisted' : 'Wishlist'}
                   </button>
 
-                  <button className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
                     <Share className="w-5 h-5" />
                     Share
                   </button>
                 </div>
 
                 <button
-                  className="w-full bg-yellow-400 text-black font-bold py-4 rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleBooking}
                   disabled={!machine.available}
+                  className="w-full bg-yellow-400 text-black font-bold py-4 rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {machine.available ? 'Book Equipment Now' : 'Currently Unavailable'}
                 </button>
 
-                <button className="w-full border border-gray-600 text-gray-300 py-3 rounded-lg font-medium hover:bg-gray-700/50 hover:text-white hover:border-gray-500 transition-colors">
+                <button
+                  onClick={handleContactOwner}
+                  className="w-full border border-gray-600 text-gray-300 py-3 rounded-lg font-medium hover:bg-gray-700/50 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Phone className="w-4 h-4" />
                   Contact Owner
                 </button>
               </div>
@@ -461,24 +475,42 @@ const ProductDetail = () => {
           </motion.div>
         </div>
       </div>
-
-      {/* Mobile Bottom Navigation */}
+      </div>
+    </PageTransition>
       {isMobile && (
-        <nav className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-white/20 border border-white/20 px-6 py-3 rounded-full safe-area-inset-bottom z-50 shadow-2xl">
+        <nav className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-gray-900/95 border border-yellow-400/20 px-6 py-3 rounded-full safe-area-inset-bottom z-50 shadow-2xl shadow-yellow-400/10">
           <div className="flex items-center justify-around">
-            {mobileNavItems.slice(0, 4).map((item) => (
-              <button
-                key={item.id}
-                onClick={() => navigate(-1)}
-                className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-400 hover:text-gray-200"
-              >
-                <item.icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium">{item.label}</span>
-              </button>
-            ))}
+            <button
+              onClick={() => navigate('/dashboard?tab=home')}
+              className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-300 hover:text-gray-100"
+            >
+              <Home className="w-5 h-5 mb-1" />
+              <span className="text-xs font-medium">Home</span>
+            </button>
+            <button
+              onClick={() => navigate('/dashboard?tab=wishlist')}
+              className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-300 hover:text-gray-100"
+            >
+              <Heart className={`w-5 h-5 mb-1 ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
+              <span className="text-xs font-medium">Wishlist</span>
+            </button>
+            <button
+              onClick={() => navigate('/dashboard?tab=bookings')}
+              className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-300 hover:text-gray-100"
+            >
+              <ShoppingCart className="w-5 h-5 mb-1" />
+              <span className="text-xs font-medium">Bookings</span>
+            </button>
+            <button
+              onClick={() => navigate('/dashboard?tab=account')}
+              className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-300 hover:text-gray-100"
+            >
+              <User className="w-5 h-5 mb-1" />
+              <span className="text-xs font-medium">Account</span>
+            </button>
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-400 hover:text-gray-200"
+              className="flex flex-col items-center px-2 py-2 rounded-lg transition-colors text-gray-300 hover:text-gray-100"
             >
               <Menu className="w-5 h-5 mb-1" />
               <span className="text-xs font-medium">More</span>
@@ -504,33 +536,38 @@ const ProductDetail = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-white/3 rounded-2xl z-50 p-6 safe-area-inset-bottom border border-white/10"
+              className="fixed bottom-4 left-4 right-4 backdrop-blur-xl bg-gray-900/95 rounded-2xl z-50 p-6 safe-area-inset-bottom border border-yellow-400/20"
             >
               <div className="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6" />
               <h3 className="text-lg font-semibold text-white mb-4">More Options</h3>
               <div className="space-y-3">
-                {[
-                  { id: 'payments', label: 'Payments', icon: ShoppingCart },
-                  { id: 'notifications', label: 'Notifications', icon: MessageCircle }
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      navigate(-1);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-gray-700/50 transition-colors"
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </button>
-                ))}
+                <button
+                  onClick={() => {
+                    navigate('/dashboard?tab=payments');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-gray-700/50 transition-colors"
+                >
+                  <CreditCard className="w-5 h-5" />
+                  <span className="font-medium">Payments</span>
+                </button>
+                <button
+                  onClick={() => {
+                    navigate('/dashboard?tab=notifications');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-gray-700/50 transition-colors"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="font-medium">Notifications</span>
+                </button>
                 <button
                   onClick={() => {
                     sessionStorage.removeItem('adminAuth');
                     localStorage.removeItem('buildmate_wishlist');
                     localStorage.removeItem('buildmate_bookings');
-                    navigate(-1);
+                    navigate('/');
+                    setMobileMenuOpen(false);
                   }}
                   className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
                 >
@@ -542,8 +579,222 @@ const ProductDetail = () => {
           </>
         )}
       </AnimatePresence>
-      </div>
-    </PageTransition>
+
+      {/* Booking Modal */}
+      <AnimatePresence>
+        {bookingModalOpen && machine && (
+          <BookingModal
+            machine={machine}
+            onClose={() => setBookingModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {shareModalOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/60 z-50"
+              onClick={() => setShareModalOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            >
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                className="bg-gray-900/95 backdrop-blur-xl border border-yellow-400/20 rounded-2xl p-6 w-full max-w-sm pointer-events-auto shadow-2xl"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-white">Share</h3>
+                  <button
+                    onClick={() => setShareModalOpen(false)}
+                    className="text-gray-400 hover:text-gray-200 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(window.location.href);
+                        toast.success('Link copied!');
+                        setShareModalOpen(false);
+                      } catch {
+                        toast.error('Could not copy link');
+                      }
+                    }}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 transition-colors text-gray-200"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-yellow-400/20 flex items-center justify-center">
+                      <Copy className="w-5 h-5 text-yellow-400" />
+                    </div>
+                    <span className="font-medium">Copy Link</span>
+                  </button>
+
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`Check out ${machine?.name} on BuildMate - ${window.location.href}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShareModalOpen(false)}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 transition-colors text-gray-200"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <MessageCircle className="w-5 h-5 text-green-400" />
+                    </div>
+                    <span className="font-medium">WhatsApp</span>
+                  </a>
+
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShareModalOpen(false)}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 transition-colors text-gray-200"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <Globe className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <span className="font-medium">Facebook</span>
+                  </a>
+
+                  <a
+                    href={`https://discord.com/share?url=${encodeURIComponent(window.location.href)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShareModalOpen(false)}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 transition-colors text-gray-200"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                      <MessageCircle className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    <span className="font-medium">Discord</span>
+                  </a>
+
+                  <a
+                    href={`mailto:?subject=${encodeURIComponent(`BuildMate - ${machine?.name}`)}&body=${encodeURIComponent(`Check out ${machine?.name} on BuildMate: ${window.location.href}`)}`}
+                    onClick={() => setShareModalOpen(false)}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 transition-colors text-gray-200"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-red-400" />
+                    </div>
+                    <span className="font-medium">Gmail</span>
+                  </a>
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Contact Owner Modal */}
+      <AnimatePresence>
+        {contactModalOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/60 z-50"
+              onClick={() => setContactModalOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            >
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                className="bg-gray-900/95 backdrop-blur-xl border border-yellow-400/20 rounded-2xl p-6 w-full max-w-sm pointer-events-auto shadow-2xl"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-white">Contact Owner</h3>
+                  <button
+                    onClick={() => setContactModalOpen(false)}
+                    className="text-gray-400 hover:text-gray-200 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                    <div className="w-12 h-12 rounded-full bg-yellow-400/20 flex items-center justify-center">
+                      <Phone className="w-6 h-6 text-yellow-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Phone</p>
+                      <p className="text-white font-medium">+91-9876543210</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText('+91-9876543210');
+                        toast.success('Number copied!');
+                      }}
+                      className="ml-auto p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 transition-colors"
+                    >
+                      <Copy className="w-4 h-4 text-gray-300" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                    <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">WhatsApp</p>
+                      <p className="text-white font-medium">+91-9876543210</p>
+                    </div>
+                    <a
+                      href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi, I'm interested in renting ${machine?.name} from BuildMate.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-auto px-4 py-2 bg-green-500/20 text-green-400 rounded-lg font-medium hover:bg-green-500/30 transition-colors text-sm"
+                    >
+                      Chat
+                    </a>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                    <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-red-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Email</p>
+                      <p className="text-white font-medium">owner@buildmate.in</p>
+                    </div>
+                    <a
+                      href={`mailto:owner@buildmate.in?subject=${encodeURIComponent(`Inquiry about ${machine?.name}`)}`}
+                      className="ml-auto px-4 py-2 bg-red-500/20 text-red-400 rounded-lg font-medium hover:bg-red-500/30 transition-colors text-sm"
+                    >
+                      Send
+                    </a>
+                  </div>
+
+                  <p className="text-xs text-gray-500 text-center mt-4">
+                    Owner typically responds within 30 minutes
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Clock, MapPin, CheckCircle2, Truck, Wrench, CreditCard, Shield, ArrowLeft, ArrowRight } from "lucide-react";
+import { X, CalendarDays, Truck, Wrench, CreditCard, Shield, ArrowLeft, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 import type { Machine } from "@/data/machines";
 
 interface Props {
@@ -15,9 +18,9 @@ interface Props {
 
 const BookingModal = ({ machine, onClose }: Props) => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [bookingData, setBookingData] = useState({
-    startDate: "",
-    duration: 1,
     deliveryMethod: "pickup" as "pickup" | "delivery",
     deliveryAddress: "",
     additionalServices: [] as string[],
@@ -27,6 +30,8 @@ const BookingModal = ({ machine, onClose }: Props) => {
 
   if (!machine) return null;
 
+  const duration = Math.max(1, selectedDates.length);
+
   const additionalServices = [
     { id: "operator", name: "Machine Operator", price: 1500, description: "Certified operator included" },
     { id: "maintenance", name: "Maintenance Package", price: 800, description: "Basic maintenance during rental" },
@@ -35,7 +40,7 @@ const BookingModal = ({ machine, onClose }: Props) => {
   ];
 
   const calculateTotal = () => {
-    const baseTotal = machine.pricePerDay * bookingData.duration;
+    const baseTotal = machine.pricePerDay * duration;
     const servicesTotal = bookingData.additionalServices.reduce((total, serviceId) => {
       const service = additionalServices.find(s => s.id === serviceId);
       return total + (service?.price || 0);
@@ -52,19 +57,46 @@ const BookingModal = ({ machine, onClose }: Props) => {
     if (currentStep > 1) setCurrentStep((currentStep - 1) as 1 | 2 | 3 | 4);
   };
 
+  const saveBooking = () => {
+    const saved = localStorage.getItem('buildmate_bookings');
+    const bookings = saved ? JSON.parse(saved) : [];
+
+    const newBooking = {
+      id: Date.now().toString(),
+      machineId: machine.id,
+      days: duration,
+      total: calculateTotal(),
+      status: 'confirmed',
+      createdAt: new Date().toISOString(),
+      duration: `${duration} days`,
+      selectedDates: selectedDates.map(d => format(d, 'yyyy-MM-dd'))
+    };
+
+    bookings.push(newBooking);
+    localStorage.setItem('buildmate_bookings', JSON.stringify(bookings));
+  };
+
   const handleConfirm = () => {
-    setCurrentStep(4);
+    saveBooking();
+    setShowSuccess(true);
     setTimeout(() => {
       onClose();
-    }, 4000);
+    }, 2000);
   };
 
   const steps = [
-    { number: 1, title: "Booking Details", icon: Calendar },
+    { number: 1, title: "Booking Details", icon: CalendarDays },
     { number: 2, title: "Delivery Options", icon: Truck },
     { number: 3, title: "Additional Services", icon: Wrench },
     { number: 4, title: "Payment & Confirm", icon: CreditCard }
   ];
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selectedDatesSummary = selectedDates.length > 0
+    ? `${selectedDates.length} day${selectedDates.length > 1 ? 's' : ''} selected`
+    : 'Select dates';
 
   return (
     <AnimatePresence>
@@ -82,12 +114,12 @@ const BookingModal = ({ machine, onClose }: Props) => {
           onClick={(e) => e.stopPropagation()}
           className="glass-card w-full max-w-2xl max-h-[90vh] overflow-hidden relative"
         >
-          <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10">
-            <X className="h-6 w-6" />
+          <button onClick={onClose} className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+            <X className="h-4 w-4" />
           </button>
 
           {/* Progress Steps */}
-          <div className="p-6 border-b border-border/50">
+          <div className="p-6 pr-14 border-b border-border/50">
             <div className="flex items-center justify-between mb-4">
               {steps.map((step, index) => (
                 <div key={step.number} className="flex items-center">
@@ -130,27 +162,50 @@ const BookingModal = ({ machine, onClose }: Props) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Start Date</Label>
-                    <Input
-                      type="date"
-                      value={bookingData.startDate}
-                      onChange={(e) => setBookingData({...bookingData, startDate: e.target.value})}
-                      className="mt-2 bg-card/50 border-border/50"
-                    />
+                    <Label className="text-sm font-medium text-muted-foreground">For Dates</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="mt-2 w-full justify-start text-left font-normal bg-card/50 border-border/50"
+                        >
+                          <CalendarDays className="mr-2 h-4 w-4" />
+                          {selectedDates.length > 0
+                            ? `${format(selectedDates[0], "MMM d")}${selectedDates.length > 1 ? ` — ${format(selectedDates[selectedDates.length - 1], "MMM d")}` : ''}`
+                            : "Select rental dates"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="multiple"
+                          selected={selectedDates}
+                          onSelect={(dates) => setSelectedDates(dates || [])}
+                          disabled={(date) => date < today}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedDatesSummary} &middot; {
+                        duration === 1 ? '1 day rental' : `${duration} day rental`
+                      }
+                    </p>
                   </div>
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Duration (Days)</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={365}
-                      value={bookingData.duration}
-                      onChange={(e) => setBookingData({...bookingData, duration: Math.max(1, parseInt(e.target.value) || 1)})}
-                      className="mt-2 bg-card/50 border-border/50"
-                    />
-                  </div>
+
+                  {selectedDates.length > 0 && (
+                    <div className="p-3 glass-card rounded-2xl space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">Selected dates:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedDates.sort((a, b) => a.getTime() - b.getTime()).map((date, i) => (
+                          <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                            {format(date, "d MMM")}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-3 sm:p-4 glass-card rounded-2xl space-y-2 sm:space-y-3">
@@ -160,11 +215,11 @@ const BookingModal = ({ machine, onClose }: Props) => {
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted-foreground">Duration</span>
-                    <span className="font-semibold">{bookingData.duration} days</span>
+                    <span className="font-semibold">{duration} day{duration > 1 ? 's' : ''}</span>
                   </div>
                   <div className="border-t border-border/50 pt-2 sm:pt-3 flex justify-between">
                     <span className="font-bold text-foreground text-sm sm:text-base">Subtotal</span>
-                    <span className="font-bold text-primary text-sm sm:text-base">₹{(machine.pricePerDay * bookingData.duration).toLocaleString()}</span>
+                    <span className="font-bold text-primary text-sm sm:text-base">₹{(machine.pricePerDay * duration).toLocaleString()}</span>
                   </div>
                 </div>
               </motion.div>
@@ -278,8 +333,8 @@ const BookingModal = ({ machine, onClose }: Props) => {
 
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Equipment ({bookingData.duration} days)</span>
-                      <span>₹{(machine.pricePerDay * bookingData.duration).toLocaleString()}</span>
+                      <span className="text-muted-foreground">Equipment ({duration} day{duration > 1 ? 's' : ''})</span>
+                      <span>₹{(machine.pricePerDay * duration).toLocaleString()}</span>
                     </div>
 
                     {bookingData.deliveryMethod === "delivery" && (
@@ -330,7 +385,7 @@ const BookingModal = ({ machine, onClose }: Props) => {
                       </div>
                       <div className="flex items-center space-x-3 p-3 glass-card rounded-xl">
                         <RadioGroupItem value="cash" id="cash" />
-                        <Label htmlFor="cash" className="cursor-pointer">Cash on Delivery</Label>
+                        <Label htmlFor="cash" className="cursor-pointer">Pay in Cash</Label>
                       </div>
                     </RadioGroup>
                   </div>
@@ -366,7 +421,7 @@ const BookingModal = ({ machine, onClose }: Props) => {
                 <Button
                   onClick={handleNext}
                   className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 flex items-center justify-center gap-2 w-full sm:w-auto"
-                  disabled={currentStep === 1 && !bookingData.startDate}
+                  disabled={currentStep === 1 && selectedDates.length === 0}
                 >
                   Next
                   <ArrowRight className="w-4 h-4" />
@@ -377,12 +432,49 @@ const BookingModal = ({ machine, onClose }: Props) => {
                   className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 flex items-center justify-center gap-2 w-full sm:w-auto"
                   disabled={!bookingData.termsAccepted}
                 >
-                  Confirm Booking
+                  {bookingData.paymentMethod === 'cash' ? 'Confirm & Book' : 'Pay & Confirm'}
                   <CheckCircle2 className="w-4 h-4" />
                 </Button>
               )}
             </div>
           </div>
+
+          {/* Success Overlay */}
+          <AnimatePresence>
+            {showSuccess && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm rounded-2xl"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", damping: 12, stiffness: 200 }}
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30"
+                >
+                  <CheckCircle2 className="w-10 h-10 text-white" />
+                </motion.div>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="text-xl font-bold text-white"
+                >
+                  Booking Confirmed
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="text-sm text-muted-foreground mt-1"
+                >
+                  Your equipment has been booked successfully
+                </motion.p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
     </AnimatePresence>

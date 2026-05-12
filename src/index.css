@@ -112,10 +112,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    /* GPU acceleration for smooth animations */
-    transform: translateZ(0);
     backface-visibility: hidden;
-    perspective: 1000px;
   }
 
   html {
@@ -124,18 +121,10 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Performance optimizations for animations */
-  * {
-    /* Force hardware acceleration for all animated elements */
-    transform-style: preserve-3d;
-    will-change: auto;
-  }
-
   /* Optimize Framer Motion animations */
   [data-framer-appear-id] {
     will-change: transform, opacity;
     backface-visibility: hidden;
-    perspective: 1000px;
   }
 
   /* Reduce motion for users who prefer it */

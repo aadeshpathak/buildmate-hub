@@ -1,156 +1,137 @@
-import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import { ArrowRight } from "lucide-react";
-import { categories } from "@/data/machines";
-import { useNavigate } from "react-router-dom";
+import { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { categories } from '@/data/machines';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const getFilterForCategory = (categoryId: string) => {
+  switch (categoryId) {
+    case 'slcm': return 'SLCM';
+    case 'crb':
+    case 'irb':
+    case 'ibp': return 'Batching Plants';
+    case 'af': return 'Transit Mixers';
+    case 'asp': return 'Concrete Pumps';
+    default: return 'All';
+  }
+};
 
 const CategoriesSection = () => {
-  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.2 });
-  const navigate = useNavigate();
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const getFilterForCategory = (categoryId: string) => {
-    switch (categoryId) {
-      case 'slcm':
-        return 'SLCM';
-      case 'crb':
-      case 'irb':
-      case 'ibp':
-        return 'Batching Plants';
-      case 'af':
-        return 'Transit Mixers';
-      case 'asp':
-        return 'Concrete Pumps';
-      default:
-        return 'All';
-    }
-  };
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
 
-  const handleCategoryClick = (categoryId: string) => {
-    const filter = getFilterForCategory(categoryId);
-    navigate(`/?filter=${encodeURIComponent(filter)}`);
-  };
+    const heading = section.querySelector('.categories-heading') as HTMLElement;
+    const cards = section.querySelectorAll('.category-card') as NodeListOf<HTMLElement>;
+    if (!heading || !cards.length) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const ctx = gsap.context(() => {
+      if (prefersReducedMotion) {
+        gsap.set([heading, ...cards], { opacity: 1, y: 0, scale: 1 });
+        return;
+      }
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: `+=${window.innerHeight * 1.5}`,
+          scrub: true,
+        }
+      });
+
+      tl.fromTo(heading,
+        { opacity: 1, y: 25 },
+        { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }
+      );
+
+      cards.forEach((card) => {
+        tl.fromTo(card,
+          { opacity: 0, y: 40, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' },
+          '>-=0.01'
+        );
+      });
+
+      tl.to({}, { duration: 0.8 });
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section id="categories" className="section-padding relative overflow-hidden" ref={ref}>
-      {/* Premium background effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-radial from-primary/10 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-radial from-yellow-400/10 to-transparent rounded-full blur-3xl" />
+    <section
+      id="categories"
+      ref={sectionRef}
+      className="relative bg-background"
+      style={{ height: 'calc(100vh * 2.5)' }}
+    >
+      <div className="sticky top-0 h-screen flex items-start justify-center pt-8 md:pt-20 overflow-hidden sm:overflow-visible">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.03] to-background pointer-events-none" />
+        <div className="absolute top-1/3 left-1/4 w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-primary/[0.08] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/3 right-1/4 w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-yellow-400/[0.08] rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
-        >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={inView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-block text-sm font-bold text-primary uppercase tracking-widest px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
-          >
-            Browse by Category
-          </motion.span>
+        <div className="max-w-6xl mx-auto relative z-10 w-full px-4 pb-4 md:pb-6">
+          <div className="categories-heading text-center mb-6 md:mb-8">
+            <div className="inline-flex items-center gap-2 text-sm font-bold text-primary uppercase tracking-widest px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
+              <Sparkles className="w-4 h-4" />
+              Browse by Category
+            </div>
+            <h2 className="heading-display text-4xl sm:text-5xl lg:text-6xl leading-tight">
+              Everything You Need to{' '}
+              <span className="text-gradient font-black">
+                Build
+              </span>
+            </h2>
+            <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto mt-2">
+              Discover our premium collection of construction equipment
+            </p>
+          </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="heading-display text-4xl sm:text-5xl lg:text-6xl leading-tight"
-          >
-            Everything You Need to{" "}
-            <span className="text-gradient font-black relative">
-              Build
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={inView ? { scaleX: 1 } : {}}
-                transition={{ delay: 0.8, duration: 0.6 }}
-                className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-primary to-yellow-400 rounded-full"
-              />
-            </span>
-          </motion.h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-5xl mx-auto">
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className="category-card glass-card rounded-xl p-3 md:p-4 group relative overflow-hidden cursor-pointer"
+                onClick={() => {
+                  const filter = getFilterForCategory(category.id);
+                  window.location.href = `/?filter=${encodeURIComponent(filter)}`;
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                <div className="absolute inset-0 border border-transparent group-hover:border-primary/30 rounded-xl transition-all duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-xl" />
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="text-xl text-muted-foreground max-w-2xl mx-auto mt-6 font-light"
-          >
-            Discover our premium collection of construction equipment, from AJAX batching plants to transit mixers and concrete pumps.
-          </motion.p>
-        </motion.div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 40, scale: 0.9 }}
-              animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{
-                duration: 0.6,
-                delay: i * 0.15,
-                type: "spring",
-                stiffness: 100
-              }}
-              whileHover={{
-                y: -12,
-                scale: 1.05,
-                transition: { duration: 0.3, ease: "easeOut" }
-              }}
-              onClick={() => handleCategoryClick(cat.id)}
-              className="glass-card p-8 cursor-pointer group hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 relative overflow-hidden"
-            >
-              {/* Premium background effects */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-              {/* Animated border */}
-              <div className="absolute inset-0 rounded-xl border-2 border-transparent bg-gradient-to-r from-primary/20 to-yellow-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-[2px]">
-                <div className="w-full h-full bg-background rounded-lg" />
-              </div>
-
-              <div className="relative z-10">
-                {/* Premium icon */}
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-5xl mb-6 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300"
-                >
-                  {cat.icon}
-                </motion.div>
-
-                <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
-                  {cat.name}
-                </h3>
-
-                <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                  {cat.description}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-black text-gradient">{cat.count}</span>
-                    <span className="text-sm font-medium text-muted-foreground">items</span>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="text-3xl md:text-5xl mb-2 w-10 h-10 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary/20 transition-shadow duration-300">
+                    {category.icon}
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      View All
-                    </span>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
-                    </motion.div>
+                  <h3 className="text-xs md:text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors duration-300 font-display truncate w-full">
+                    {category.name}
+                  </h3>
+                  <p className="text-[11px] md:text-sm text-muted-foreground mb-1 leading-relaxed line-clamp-1">
+                    {category.description}
+                  </p>
+                  <div className="flex items-center gap-2 pt-1 border-t border-primary/10 w-full justify-center">
+                    <span className="text-sm md:text-xl font-black text-gradient">{category.count}</span>
+                    <span className="text-[11px] md:text-sm text-muted-foreground">items</span>
                   </div>
+                  <span className="mt-1 text-[11px] md:text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
+                    View All
+                    <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
+                  </span>
                 </div>
 
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
