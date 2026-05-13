@@ -1,0 +1,58 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Spokes } from "@/components/ui/spokes";
+
+const PagePreloader = ({ onComplete }: { onComplete: () => void }) => {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisible(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <AnimatePresence onExitComplete={onComplete}>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+          style={{
+            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)",
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="flex flex-col items-center gap-6"
+          >
+            <Spokes className="w-12 h-12 text-yellow-400" style={{ "--duration": "0.8s" } as React.CSSProperties} />
+            <div className="text-center">
+              <h1 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
+                BuildMate
+              </h1>
+              <p className="text-sm text-yellow-400/70 mt-1 font-medium tracking-wider uppercase">
+                Loading your experience
+              </p>
+            </div>
+            <div className="w-36 h-1 rounded-full bg-white/10 overflow-hidden mt-2">
+              <motion.div
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 2.5, ease: "easeInOut" }}
+                className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600"
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export default PagePreloader;
