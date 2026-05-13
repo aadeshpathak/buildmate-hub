@@ -707,7 +707,7 @@ const ProductDetail = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 z-50"
+              className="fixed inset-0 bg-transparent z-50"
               onClick={() => setContactModalOpen(false)}
             />
             <motion.div
@@ -719,7 +719,7 @@ const ProductDetail = () => {
             >
               <motion.div
                 onClick={(e) => e.stopPropagation()}
-                className="bg-gray-900/95 backdrop-blur-xl border border-yellow-400/20 rounded-2xl p-6 w-full max-w-sm pointer-events-auto shadow-2xl"
+                className="bg-gray-900/95 border border-yellow-400/20 rounded-2xl p-6 w-full max-w-md pointer-events-auto shadow-2xl mx-auto"
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-white">Contact Owner</h3>
@@ -732,61 +732,92 @@ const ProductDetail = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
-                    <div className="w-12 h-12 rounded-full bg-yellow-400/20 flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-yellow-400" />
+                  <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-yellow-400/20 flex items-center justify-center shrink-0">
+                        <User className="w-6 h-6 text-yellow-400" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-white font-semibold truncate">Praveen Mani Tripathi</p>
+                        <p className="text-sm text-gray-400">Sales Manager</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Phone</p>
-                      <p className="text-white font-medium">+91-9876543210</p>
+                    <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                      <a
+                        href="tel:8887956464"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-yellow-400/10 text-yellow-400 rounded-lg font-medium hover:bg-yellow-400/20 transition-colors text-sm flex-1"
+                      >
+                        <Phone className="w-4 h-4" />
+                        +91 88879 56464
+                      </a>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText('8887956464');
+                            toast.success('Number copied!');
+                          }}
+                          className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gray-700/50 text-gray-300 rounded-lg hover:bg-gray-600/50 transition-colors flex-1 sm:flex-none"
+                        >
+                          <Copy className="w-4 h-4" />
+                          <span className="sm:hidden">Copy</span>
+                        </button>
+                        <a
+                          href={`https://wa.me/918887956464?text=${encodeURIComponent(`Hi, I'm interested in renting ${machine?.name} from BuildMate.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 px-3 py-2.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors flex-1 sm:flex-none"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="sm:hidden">WhatsApp</span>
+                        </a>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText('+91-9876543210');
-                        toast.success('Number copied!');
-                      }}
-                      className="ml-auto p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 transition-colors"
-                    >
-                      <Copy className="w-4 h-4 text-gray-300" />
-                    </button>
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
-                    <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-green-400" />
+                  <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-yellow-400/20 flex items-center justify-center shrink-0">
+                        <User className="w-6 h-6 text-yellow-400" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-white font-semibold truncate">Amit Shukla</p>
+                        <p className="text-sm text-gray-400">Technical Manager</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-400">WhatsApp</p>
-                      <p className="text-white font-medium">+91-9876543210</p>
+                    <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                      <a
+                        href="tel:8855995591"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-yellow-400/10 text-yellow-400 rounded-lg font-medium hover:bg-yellow-400/20 transition-colors text-sm flex-1"
+                      >
+                        <Phone className="w-4 h-4" />
+                        +91 88559 95591
+                      </a>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText('8855995591');
+                            toast.success('Number copied!');
+                          }}
+                          className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gray-700/50 text-gray-300 rounded-lg hover:bg-gray-600/50 transition-colors flex-1 sm:flex-none"
+                        >
+                          <Copy className="w-4 h-4" />
+                          <span className="sm:hidden">Copy</span>
+                        </button>
+                        <a
+                          href={`https://wa.me/918855995591?text=${encodeURIComponent(`Hi, I'm interested in renting ${machine?.name} from BuildMate.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 px-3 py-2.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors flex-1 sm:flex-none"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="sm:hidden">WhatsApp</span>
+                        </a>
+                      </div>
                     </div>
-                    <a
-                      href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi, I'm interested in renting ${machine?.name} from BuildMate.`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-auto px-4 py-2 bg-green-500/20 text-green-400 rounded-lg font-medium hover:bg-green-500/30 transition-colors text-sm"
-                    >
-                      Chat
-                    </a>
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
-                    <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-red-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Email</p>
-                      <p className="text-white font-medium">owner@buildmate.in</p>
-                    </div>
-                    <a
-                      href={`mailto:owner@buildmate.in?subject=${encodeURIComponent(`Inquiry about ${machine?.name}`)}`}
-                      className="ml-auto px-4 py-2 bg-red-500/20 text-red-400 rounded-lg font-medium hover:bg-red-500/30 transition-colors text-sm"
-                    >
-                      Send
-                    </a>
-                  </div>
-
-                  <p className="text-xs text-gray-500 text-center mt-4">
-                    Owner typically responds within 30 minutes
+                  <p className="text-xs text-gray-500 text-center pt-2">
+                    Available Monday to Saturday, 9 AM to 6 PM IST
                   </p>
                 </div>
               </motion.div>

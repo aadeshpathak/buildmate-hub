@@ -618,7 +618,7 @@ const HeroSection = () => {
 
               {/* Desktop: Horizontal Row */}
               <div className="hidden xl:block px-4">
-                <div className="flex flex-row justify-center gap-12 max-w-6xl mx-auto">
+                <div className="flex flex-row justify-right gap-12 max-w-6xl mx-auto">
                   {stats.map((stat, i) => (
                     <motion.div
                       key={stat.label}
