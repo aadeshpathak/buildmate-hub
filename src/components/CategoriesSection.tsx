@@ -43,16 +43,16 @@ const CategoriesSection = () => {
         const mobileCards = section.querySelectorAll('.category-card-mobile') as NodeListOf<HTMLElement>;
         if (!mobileCards.length) return;
 
-        gsap.set(mobileCards, { opacity: 0, x: 0, y: 0, scale: 1 });
+        gsap.set(mobileCards, { opacity: 0, x: 0, y: 0, scale: 1, rotateX: 0, rotateY: 0, filter: 'blur(0px)' });
         gsap.set(heading, { opacity: 0, y: 20 });
 
         const patterns = [
-          { enter: { scale: 0, opacity: 0 }, in: { scale: 1, opacity: 1, duration: 0.3, ease: 'power2.out' }, exit: { scale: 0.9, y: -80, opacity: 0, duration: 0.25, ease: 'power2.in' } },
-          { enter: { y: -60, opacity: 0 }, in: { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }, exit: { x: 100, opacity: 0, duration: 0.25, ease: 'power2.in' } },
-          { enter: { x: 80, opacity: 0 }, in: { x: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }, exit: { scale: 0.5, y: 60, opacity: 0, duration: 0.25, ease: 'power2.in' } },
-          { enter: { scale: 0.6, y: 50, opacity: 0 }, in: { scale: 1, y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }, exit: { x: -100, opacity: 0, duration: 0.25, ease: 'power2.in' } },
-          { enter: { x: -80, opacity: 0 }, in: { x: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }, exit: { y: -60, opacity: 0, duration: 0.25, ease: 'power2.in' } },
-          { enter: { y: -50, opacity: 0 }, in: { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' }, exit: null },
+          { enter: { scale: 0.3, opacity: 0, rotateZ: -15, filter: 'blur(8px)' }, in: { scale: 1, opacity: 1, rotateZ: 0, filter: 'blur(0px)', duration: 0.4, ease: 'back.out(1.5)' }, exit: { opacity: 0, duration: 0.12, ease: 'power2.in' } },
+          { enter: { y: 80, opacity: 0, rotateX: 45, filter: 'blur(6px)' }, in: { y: 0, opacity: 1, rotateX: 0, filter: 'blur(0px)', duration: 0.4, ease: 'back.out(1.4)' }, exit: { opacity: 0, duration: 0.12, ease: 'power2.in' } },
+          { enter: { x: -100, opacity: 0, skewX: 20, filter: 'blur(5px)' }, in: { x: 0, opacity: 1, skewX: 0, filter: 'blur(0px)', duration: 0.4, ease: 'back.out(1.5)' }, exit: { opacity: 0, duration: 0.12, ease: 'power2.in' } },
+          { enter: { scale: 0.5, y: -60, opacity: 0, rotateY: -90, filter: 'blur(6px)' }, in: { scale: 1, y: 0, opacity: 1, rotateY: 0, filter: 'blur(0px)', duration: 0.4, ease: 'back.out(1.5)' }, exit: { opacity: 0, duration: 0.12, ease: 'power2.in' } },
+          { enter: { x: 100, opacity: 0, skewX: -20, filter: 'blur(5px)' }, in: { x: 0, opacity: 1, skewX: 0, filter: 'blur(0px)', duration: 0.4, ease: 'back.out(1.4)' }, exit: { opacity: 0, duration: 0.12, ease: 'power2.in' } },
+          { enter: { y: -50, opacity: 0, rotateZ: 10, scale: 0.8, filter: 'blur(4px)' }, in: { y: 0, opacity: 1, rotateZ: 0, scale: 1, filter: 'blur(0px)', duration: 0.4, ease: 'back.out(1.3)' }, exit: null },
         ];
 
         const tl = gsap.timeline({
@@ -60,51 +60,66 @@ const CategoriesSection = () => {
             trigger: section,
             start: 'top top',
             end: `+=${window.innerHeight * 3.5}`,
-            scrub: 0.3,
+            scrub: 0.2,
             snap: {
               snapTo: 'labelsDirectional',
-              duration: { min: 0.2, max: 0.5 },
+              duration: { min: 0.15, max: 0.35 },
               ease: 'power2.out',
             },
           }
         });
 
-        tl.fromTo(heading, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }, 'step-0');
+        tl.fromTo(heading, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.15, ease: 'power2.out' }, 'step-0');
         tl.fromTo(mobileCards[0], patterns[0].enter, patterns[0].in, 'step-1');
 
         for (let i = 1; i < mobileCards.length; i++) {
           const label = `step-${i + 1}`;
           tl.to(mobileCards[i-1], patterns[i-1].exit, label);
-          tl.fromTo(mobileCards[i], patterns[i].enter, patterns[i].in, `${label}+=0.22`);
+          tl.fromTo(mobileCards[i], patterns[i].enter, patterns[i].in, `${label}+=0.05`);
         }
 
       } else {
         const cards = section.querySelectorAll('.category-card') as NodeListOf<HTMLElement>;
         if (!cards.length) return;
 
+        gsap.set(cards, { opacity: 0, y: 50, scale: 0.92 });
+
+        const row1 = [cards[0], cards[1], cards[2]];
+        const row2 = [cards[3], cards[4], cards[5]];
+
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: 'top top',
-            end: `+=${window.innerHeight * 3.5}`,
-            scrub: 0.3,
+            end: `+=${window.innerHeight * 2.5}`,
+            scrub: 0.2,
           }
         });
 
         tl.fromTo(heading,
           { opacity: 1, y: 25 },
-          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
+          { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }
         );
 
-        cards.forEach((card) => {
-          tl.fromTo(card,
-            { opacity: 0, y: 50, scale: 0.92 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'power2.out' },
-            '>-=0.1'
-          );
+        tl.to(row1, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.35,
+          ease: 'power2.out',
+          stagger: 0.08
         });
 
-        tl.to({}, { duration: 0.5 });
+        tl.to(row2, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.35,
+          ease: 'power2.out',
+          stagger: 0.08
+        }, '>');
+
+        tl.to({}, { duration: 0.05 });
       }
     }, section);
 
@@ -115,7 +130,7 @@ const CategoriesSection = () => {
     <section
       id="categories"
       ref={sectionRef}
-      className="relative bg-background max-sm:h-[400vh] sm:h-[450vh]"
+      className="relative bg-background max-sm:h-[400vh] sm:h-[270vh]"
     >
       <div className="sticky top-0 max-sm:h-screen sm:min-h-screen flex items-start justify-center pt-8 md:pt-12 lg:pt-16 pb-4 sm:pb-8 overflow-hidden sm:overflow-visible">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.03] to-background pointer-events-none" />

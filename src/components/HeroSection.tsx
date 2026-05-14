@@ -113,62 +113,7 @@ const PremiumPageLoader = ({ onComplete }: { onComplete: () => void }) => {
             height: 100%;
             background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
             border-radius: 2px;
-            animation: progressFill 4s ease-in-out 0.8s both;
-          "></div>
-        </div>
-
-        <!-- Subtle Animated Elements -->
-        <div style="
-          position: absolute;
-          top: 25%;
-          left: 20%;
-          width: 12px;
-          height: 12px;
-          background: rgba(251, 191, 36, 0.6);
-          border-radius: 50%;
-          filter: blur(2px);
-          animation: float 3.5s ease-in-out infinite 0.5s;
-        "></div>
-
-        <div style="
-          position: absolute;
-          top: 30%;
-          right: 25%;
-          width: 8px;
-          height: 8px;
-          background: rgba(245, 158, 11, 0.5);
-          border-radius: 50%;
-          filter: blur(1px);
-          animation: float 2.8s ease-in-out infinite 0.8s;
-        "></div>
-
-        <div style="
-          position: absolute;
-          bottom: 25%;
-          left: 30%;
-          width: 10px;
-          height: 10px;
-          background: rgba(251, 146, 60, 0.7);
-          border-radius: 50%;
-          filter: blur(1.5px);
-          animation: float 4s ease-in-out infinite 1.1s;
-        "></div>
-
-        <!-- Progress Bar -->
-        <div style="
-          width: 240px;
-          height: 4px;
-          background: rgba(55, 65, 81, 0.5);
-          border-radius: 2px;
-          margin: 0 auto 2.5rem;
-          overflow: hidden;
-          animation: textFadeIn 0.6s ease-out 0.6s both;
-        ">
-          <div style="
-            height: 100%;
-            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
-            border-radius: 2px;
-            animation: progressFill 4s ease-in-out 0.8s both;
+            animation: progressFill 0.35s ease-in-out 0.05s both;
           "></div>
         </div>
 
@@ -308,7 +253,7 @@ const PremiumPageLoader = ({ onComplete }: { onComplete: () => void }) => {
         console.log('✨ PREMIUM LOADER: Experience complete, navigating to dashboard');
         onComplete();
       }, 500);
-    }, 4000);
+    }, 400);
 
     return () => {
       clearTimeout(timer);
@@ -395,25 +340,25 @@ const heroAnimations = {
   }
 };
 
-// Cinematic transitions - slower and more intentional
+// Snappy transitions - quick and smooth
 const heroTransitions = {
   content: {
-    duration: 1.5,
-    ease: [0.25, 0.46, 0.45, 0.94] // Custom easing for cinematic feel
+    duration: 0.8,
+    ease: [0.16, 1, 0.3, 1]
   },
   stats: (index: number) => ({
-    duration: 1.2,
-    delay: 0.8 + (index * 0.2),
-    ease: [0.25, 0.46, 0.45, 0.94]
+    duration: 0.6,
+    delay: 0.4 + (index * 0.12),
+    ease: [0.16, 1, 0.3, 1]
   }),
   button: {
-    duration: 0.5,
-    ease: [0.23, 1, 0.32, 1] // Custom easing for premium feel
+    duration: 0.35,
+    ease: [0.16, 1, 0.3, 1]
   }
 };
 
 // Animated Counter Component
-const AnimatedCounter = ({ value, duration = 2 }: { value: string; duration?: number }) => {
+const AnimatedCounter = ({ value, duration = 1 }: { value: string; duration?: number }) => {
   const [displayValue, setDisplayValue] = useState("0");
   const numericValue = parseInt(value.replace(/[^0-9]/g, "")) || 0;
   const hasPlus = value.includes("+");

@@ -87,10 +87,10 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Enhanced Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          transition={{ duration: 0.4 }}
+          className="text-center mb-16"
         >
 
           <h2 className="heading-display text-4xl sm:text-5xl lg:text-6xl mt-6 mb-6">
@@ -106,9 +106,9 @@ const HowItWorks = () => {
           </h2>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.35, delay: 0.2 }}
             className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed"
           >
             Experience the future of construction equipment rental with our seamless 4-step process designed for efficiency and excellence
@@ -120,14 +120,14 @@ const HowItWorks = () => {
           {steps.map((step, i) => (
             <motion.div
               key={step.title}
-              initial={{ opacity: 0, y: 60, scale: 0.8 }}
+              initial={{ opacity: 0, y: 40, scale: 0.9 }}
               animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
               transition={{
-                duration: 0.8,
-                delay: i * 0.2 + 0.6,
+                duration: 0.5,
+                delay: i * 0.15 + 0.3,
                 type: "spring",
-                stiffness: 100,
-                damping: 15
+                stiffness: 150,
+                damping: 18
               }}
               className="relative group"
             >
