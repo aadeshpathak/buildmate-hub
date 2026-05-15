@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Heart, Share, Star, MapPin, ShoppingCart, MessageCircle, AlertCircle, Calendar, Clock, Shield, CheckCircle, Home, User, Menu, LogOut, CreditCard, Bell, Phone, Link, Copy, Globe, Mail, X } from "lucide-react";
+import { ArrowLeft, Heart, Share, Star, MapPin, ShoppingCart, MessageCircle, AlertCircle, Calendar, Clock, Shield, CheckCircle, Home, User, Menu, LogOut, CreditCard, Bell, Phone, Link, Copy, Globe, Mail, X, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,6 +48,18 @@ const ProductDetail = () => {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [inCart, setInCart] = useState(false);
+
+  const hasPreviousBooking = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('buildmate_bookings');
+      if (!saved || !id) return false;
+      const bookings = JSON.parse(saved);
+      return bookings.some((b: any) => b.machineId === id);
+    } catch {
+      return false;
+    }
+  }, [id]);
 
   // Toggle wishlist
   const toggleWishlist = () => {
@@ -81,6 +93,41 @@ const ProductDetail = () => {
   };
 
   const { machine, loading, error } = useMachine(id);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('buildmate_cart');
+      if (saved && id) {
+        const cart = JSON.parse(saved);
+        setInCart(cart.some((item: any) => item.machineId === id));
+      }
+    } catch {}
+  }, [id]);
+
+  const addToCart = useCallback(() => {
+    if (!machine) return;
+    const saved = localStorage.getItem('buildmate_cart');
+    let cart = saved ? JSON.parse(saved) : [];
+    const existing = cart.findIndex((item: any) => item.machineId === machine.id);
+    if (existing >= 0) {
+      cart.splice(existing, 1);
+      localStorage.setItem('buildmate_cart', JSON.stringify(cart));
+      setInCart(false);
+      toast.success('Removed from cart');
+    } else {
+      cart.push({
+        machineId: machine.id,
+        machineName: machine.name,
+        machineImage: machine.image,
+        pricePerDay: machine.pricePerDay,
+        quantity: 1,
+        addedAt: new Date().toISOString()
+      });
+      localStorage.setItem('buildmate_cart', JSON.stringify(cart));
+      setInCart(true);
+      toast.success('Added to cart');
+    }
+  }, [machine]);
 
   if (loading) {
     return (
@@ -243,7 +290,7 @@ const ProductDetail = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/dashboard?tab=home')}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -381,41 +428,49 @@ const ProductDetail = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2 sm:space-y-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <button
                     onClick={toggleWishlist}
-                    className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+                    className={`flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-xs sm:text-sm transition-colors ${
                       isWishlisted
                         ? 'bg-red-50 text-red-600 border border-red-200'
                         : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
                     }`}
                   >
-                    <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                    <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                     {isWishlisted ? 'Wishlisted' : 'Wishlist'}
                   </button>
 
                   <button
-                    onClick={handleShare}
-                    className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
-                    <Share className="w-5 h-5" />
-                    Share
+                    onClick={(e) => { e.stopPropagation(); addToCart(); }}
+                    className={`flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-xs sm:text-sm border transition-colors ${
+                      inCart
+                        ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <ShoppingBag className={`w-4 h-4 sm:w-5 sm:h-5 ${inCart ? 'text-red-500' : ''}`} />
+                    <span className="hidden xs:inline">{inCart ? 'Remove' : 'Add to Cart'}</span>
+                    <span className="inline xs:hidden">{inCart ? 'Remove' : 'Cart'}</span>
                   </button>
                 </div>
 
                 <button
                   onClick={handleBooking}
                   disabled={!machine.available}
-                  className="w-full bg-yellow-400 text-black font-bold py-4 rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-yellow-400 text-black font-bold py-3 sm:py-4 rounded-lg text-sm sm:text-base hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {machine.available ? 'Book Equipment Now' : 'Currently Unavailable'}
+                  {machine.available ? (
+                    hasPreviousBooking ? 'Book Equipment Again' : 'Book Equipment Now'
+                  ) : 'Currently Unavailable'}
                 </button>
 
                 <button
                   onClick={handleContactOwner}
-                  className="w-full border border-gray-600 text-gray-300 py-3 rounded-lg font-medium hover:bg-gray-700/50 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center gap-2"
+                  className="w-full border border-gray-600 text-gray-300 py-2.5 sm:py-3 rounded-lg font-medium text-xs sm:text-sm hover:bg-gray-700/50 hover:text-white hover:border-gray-500 transition-colors flex items-center justify-center gap-2"
                 >
-                  <Phone className="w-4 h-4" />
+                  <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   Contact Owner
                 </button>
               </div>

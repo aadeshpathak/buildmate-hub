@@ -6,11 +6,38 @@ const PagePreloader = ({ onComplete }: { onComplete: () => void }) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(false);
-    }, 400);
+    const startTime = Date.now();
+    let loadFired = document.readyState === 'complete';
+    let cancelled = false;
 
-    return () => clearTimeout(timer);
+    const tryDismiss = () => {
+      if (cancelled) return;
+      const elapsed = Date.now() - startTime;
+      const delay = Math.max(200, 500 - elapsed);
+      setTimeout(() => { if (!cancelled) setVisible(false); }, delay);
+    };
+
+    if (loadFired) {
+      tryDismiss();
+    }
+
+    window.addEventListener('load', () => {
+      loadFired = true;
+      tryDismiss();
+    });
+
+    const fallback = setTimeout(() => {
+      if (!loadFired) {
+        loadFired = true;
+        tryDismiss();
+      }
+    }, 5000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(fallback);
+      window.removeEventListener('load', tryDismiss);
+    };
   }, []);
 
   return (

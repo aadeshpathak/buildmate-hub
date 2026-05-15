@@ -18,11 +18,21 @@ interface Booking {
   createdAt: string;
   selectedDates?: string[];
 }
+
+interface CartItem {
+  machineId: string;
+  machineName: string;
+  machineImage: string;
+  pricePerDay: number;
+  quantity: number;
+  addedAt: string;
+}
+
 import {
   // Core Navigation
   Home, Heart, ShoppingCart, User, Bell, MessageSquare, LogOut, CreditCard,
   Search, Filter, Plus, Star, MapPin, Menu, X, ChevronRight,
-  Truck, Calendar, CheckCircle, Clock, AlertCircle, MoreHorizontal,
+  Truck, Calendar, CheckCircle, Clock, AlertCircle, MoreHorizontal, ShoppingBag, Minus,
   // Premium additions
   Crown, Sparkles, Flame
 } from 'lucide-react';
@@ -48,7 +58,7 @@ const mobileNavItems = [
 ];
 
 // Machine Card Component
-const MachineCard = ({ machine, isWishlisted, onToggleWishlist, onViewDetails, index = 0 }) => (
+const MachineCard = ({ machine, isWishlisted, isInCart, onToggleWishlist, onViewDetails, onAddToCart, onRemoveFromCart, index = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -98,12 +108,25 @@ const MachineCard = ({ machine, isWishlisted, onToggleWishlist, onViewDetails, i
           <p className="text-lg font-bold text-white">₹{machine.pricePerDay.toLocaleString()}</p>
           <p className="text-sm text-gray-400">per day</p>
         </div>
+      <div className="flex items-center justify-between gap-2">
         <button
           onClick={onViewDetails}
-          className="px-4 py-2 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors"
+          className="flex-1 px-4 py-2 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-500 transition-colors"
         >
           View Details
         </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); isInCart ? onRemoveFromCart(machine.id) : onAddToCart(machine); }}
+          className={`px-3 py-2 rounded-lg font-medium text-xs transition-colors flex items-center gap-1 ${
+            isInCart
+              ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'
+              : 'bg-gray-700 text-gray-200 border border-gray-600 hover:bg-gray-600'
+          }`}
+        >
+          <ShoppingBag className={`w-3.5 h-3.5 ${isInCart ? '' : ''}`} />
+          {isInCart ? 'Remove' : 'Add'}
+        </button>
+      </div>
       </div>
     </div>
   </motion.div>
@@ -125,7 +148,7 @@ const Card = ({ children, className = '', variant = 'default' }) => {
 };
 
 // Category Section Component
-const CategorySection = ({ title, machines, wishlist, onToggleWishlist, onViewDetails, onViewAll }) => (
+const CategorySection = ({ title, machines, wishlist, onToggleWishlist, onViewDetails, onViewAll, onAddToCart, onRemoveFromCart, isInCart }) => (
   <div>
     <div className="flex items-center justify-between mb-4">
       <h2 className="text-xl font-semibold text-white">{title}</h2>
@@ -169,12 +192,24 @@ const CategorySection = ({ title, machines, wishlist, onToggleWishlist, onViewDe
           <div className="p-3">
             <h4 className="font-medium text-white text-sm mb-1 truncate">{machine.name}</h4>
             <p className="text-xs text-gray-400 mb-2">₹{machine.pricePerDay.toLocaleString()}/day</p>
-            <button
-              onClick={() => onViewDetails(machine.id)}
-              className="w-full py-2 bg-yellow-400 text-black text-xs font-medium rounded hover:bg-yellow-500 transition-colors"
-            >
-              Book Now
-            </button>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => onViewDetails(machine.id)}
+                className="flex-1 py-2 bg-yellow-400 text-black text-xs font-medium rounded hover:bg-yellow-500 transition-colors"
+              >
+                Book Now
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); isInCart(machine.id) ? onRemoveFromCart(machine.id) : onAddToCart(machine); }}
+                className={`px-2 py-2 rounded text-xs font-medium transition-colors ${
+                  isInCart(machine.id)
+                    ? 'bg-red-500/10 text-red-400 border border-red-500/30'
+                    : 'bg-gray-700 text-gray-200 border border-gray-600 hover:bg-gray-600'
+                }`}
+              >
+                <ShoppingBag className={`w-3.5 h-3.5`} />
+              </button>
+            </div>
           </div>
         </motion.div>
       ))}
@@ -184,16 +219,16 @@ const CategorySection = ({ title, machines, wishlist, onToggleWishlist, onViewDe
 
 // Booking Card Component
 const BookingCard = ({ booking, onCancel, onDelete }) => (
-  <div className="bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-700">
+  <div className="bg-gray-800 rounded-xl p-3 sm:p-4 border border-gray-700">
     <div className="flex items-start gap-3 mb-3">
       {booking.machineImage && (
-        <img src={booking.machineImage} alt={booking.machineName} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+        <img src={booking.machineImage} alt={booking.machineName} className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shrink-0" />
       )}
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-white truncate">{booking.machineName || `Booking #${booking.id}`}</h3>
-        <p className="text-sm text-gray-400">{new Date(booking.createdAt).toLocaleDateString()}</p>
+        <h3 className="font-semibold text-white text-sm sm:text-base truncate">{booking.machineName || `Booking #${booking.id}`}</h3>
+        <p className="text-xs sm:text-sm text-gray-400">{new Date(booking.createdAt).toLocaleDateString()}</p>
       </div>
-      <div className={`px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+      <div className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium shrink-0 ${
         booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
         booking.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
         'bg-yellow-500/20 text-yellow-400'
@@ -201,14 +236,25 @@ const BookingCard = ({ booking, onCancel, onDelete }) => (
         {booking.status}
       </div>
     </div>
-    <div className="space-y-2 text-sm text-gray-300">
-      <p><span className="font-medium text-white">Duration:</span> {booking.duration || `${booking.days || 1} days`}</p>
-      <p><span className="font-medium text-white">Total:</span> ₹{(booking.total || 0).toLocaleString()}</p>
+    <div className="space-y-1.5 text-xs sm:text-sm text-gray-300">
+      <div className="flex justify-between">
+        <span className="text-gray-400">Duration</span>
+        <span className="text-white">{booking.duration || `${booking.days || 1} days`}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-400">Total</span>
+        <span className="text-white font-medium">₹{(booking.total || 0).toLocaleString()}</span>
+      </div>
       {booking.selectedDates && booking.selectedDates.length > 0 && (
-        <p><span className="font-medium text-white">Dates:</span> {new Date(booking.selectedDates[0]).toLocaleDateString()}{booking.selectedDates.length > 1 ? ` — ${new Date(booking.selectedDates[booking.selectedDates.length - 1]).toLocaleDateString()}` : ''}</p>
+        <div className="flex justify-between">
+          <span className="text-gray-400">Dates</span>
+          <span className="text-white text-right max-w-[60%] truncate">
+            {new Date(booking.selectedDates[0]).toLocaleDateString()}{booking.selectedDates.length > 1 ? ` — ${new Date(booking.selectedDates[booking.selectedDates.length - 1]).toLocaleDateString()}` : ''}
+          </span>
+        </div>
       )}
     </div>
-    <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-700">
+    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-700">
       {booking.status !== 'cancelled' && (
         <button
           onClick={() => onCancel(booking.id)}
@@ -235,6 +281,7 @@ const Dashboard = () => {
   const [displayLimit, setDisplayLimit] = useState(6); // Start with 6 machines
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [viewAllCategory, setViewAllCategory] = useState<string | null>(null);
   const [viewAllLimit, setViewAllLimit] = useState(5);
@@ -324,12 +371,14 @@ const Dashboard = () => {
     }
   }, [viewAllCategory]);
 
-  // Load wishlist and bookings from localStorage
+  // Load wishlist, bookings and cart from localStorage
   useEffect(() => {
     const savedWishlist = localStorage.getItem('buildmate_wishlist');
     const savedBookings = localStorage.getItem('buildmate_bookings');
+    const savedCart = localStorage.getItem('buildmate_cart');
     if (savedWishlist) setWishlist(JSON.parse(savedWishlist) as string[]);
     if (savedBookings) setBookings(JSON.parse(savedBookings) as Booking[]);
+    if (savedCart) setCart(JSON.parse(savedCart) as CartItem[]);
   }, []);
 
   // Set defer flag to prevent global ScrollManager from interfering
@@ -386,6 +435,10 @@ const Dashboard = () => {
   useEffect(() => {
     localStorage.setItem('buildmate_bookings', JSON.stringify(bookings));
   }, [bookings]);
+
+  useEffect(() => {
+    localStorage.setItem('buildmate_cart', JSON.stringify(cart));
+  }, [cart]);
 
   // Group machines by category for category sections
   const machinesByCategory = useMemo(() => {
@@ -465,6 +518,43 @@ const Dashboard = () => {
         : [...prev, machineId]
     );
   };
+
+  const addToCart = (machine: Machine) => {
+    setCart(prev => {
+      const existing = prev.find(item => item.machineId === machine.id);
+      if (existing) {
+        return prev.map(item =>
+          item.machineId === machine.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, {
+        machineId: machine.id,
+        machineName: machine.name,
+        machineImage: machine.image,
+        pricePerDay: machine.pricePerDay,
+        quantity: 1,
+        addedAt: new Date().toISOString()
+      }];
+    });
+  };
+
+  const removeFromCart = (machineId: string) => {
+    setCart(prev => prev.filter(item => item.machineId !== machineId));
+  };
+
+  const updateCartQuantity = (machineId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(machineId);
+      return;
+    }
+    setCart(prev => prev.map(item =>
+      item.machineId === machineId ? { ...item, quantity } : item
+    ));
+  };
+
+  const isInCart = (machineId: string) => cart.some(item => item.machineId === machineId);
 
   // Add booking (for future Firestore sync)
   const addBooking = (machineId: string, bookingData: Partial<Booking>) => {
@@ -673,8 +763,11 @@ const Dashboard = () => {
                                       machine={machine}
                                       index={index}
                                       isWishlisted={wishlist.includes(machine.id)}
+                                      isInCart={isInCart(machine.id)}
                                       onToggleWishlist={toggleWishlist}
                                       onViewDetails={() => handleViewDetails(machine.id)}
+                                      onAddToCart={addToCart}
+                                      onRemoveFromCart={removeFromCart}
                                     />
                                   ))}
                                 </div>
@@ -719,16 +812,19 @@ const Dashboard = () => {
                               </div>
                             ) : (
                               <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                  {viewAllMachines.slice(0, viewAllLimit).map((machine, index) => (
-                                    <MachineCard
-                                      key={machine.id}
-                                      machine={machine}
-                                      index={index}
-                                      isWishlisted={wishlist.includes(machine.id)}
-                                      onToggleWishlist={toggleWishlist}
-                                      onViewDetails={() => handleViewDetails(machine.id)}
-                                    />
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {viewAllMachines.slice(0, viewAllLimit).map((machine, index) => (
+                                      <MachineCard
+                                        key={machine.id}
+                                        machine={machine}
+                                        index={index}
+                                        isWishlisted={wishlist.includes(machine.id)}
+                                        isInCart={isInCart(machine.id)}
+                                        onToggleWishlist={toggleWishlist}
+                                        onViewDetails={() => handleViewDetails(machine.id)}
+                                        onAddToCart={addToCart}
+                                        onRemoveFromCart={removeFromCart}
+                                      />
                                   ))}
                                 </div>
                                 {!isAllLoadedInViewAll && (
@@ -759,11 +855,14 @@ const Dashboard = () => {
                               onToggleWishlist={toggleWishlist}
                               onViewDetails={(id) => handleViewDetails(id)}
                               onViewAll={() => handleViewAll(category)}
+                              onAddToCart={addToCart}
+                              onRemoveFromCart={removeFromCart}
+                              isInCart={isInCart}
                             />
                           ));
                         } else {
                           categorySections = categories.includes(selectedCategory) ? (
-                            <CategorySection
+                          <CategorySection
                               key={selectedCategory}
                               title={selectedCategory}
                               machines={machinesByCategory[selectedCategory]?.slice(0, 6) || []}
@@ -771,6 +870,9 @@ const Dashboard = () => {
                               onToggleWishlist={toggleWishlist}
                               onViewDetails={(id) => handleViewDetails(id)}
                               onViewAll={() => handleViewAll(selectedCategory)}
+                              onAddToCart={addToCart}
+                              onRemoveFromCart={removeFromCart}
+                              isInCart={isInCart}
                             />
                           ) : null;
                         }
@@ -802,14 +904,17 @@ const Dashboard = () => {
                     {machines
                       .filter(machine => wishlist.includes(machine.id))
                       .map((machine, index) => (
-                        <MachineCard
-                          key={machine.id}
-                          machine={machine}
-                          index={index}
-                          isWishlisted={true}
-                          onToggleWishlist={toggleWishlist}
-                          onViewDetails={() => handleViewDetails(machine.id)}
-                        />
+                                    <MachineCard
+                                      key={machine.id}
+                                      machine={machine}
+                                      index={index}
+                                      isWishlisted={wishlist.includes(machine.id)}
+                                      isInCart={isInCart(machine.id)}
+                                      onToggleWishlist={toggleWishlist}
+                                      onViewDetails={() => handleViewDetails(machine.id)}
+                                      onAddToCart={addToCart}
+                                      onRemoveFromCart={removeFromCart}
+                                    />
                       ))}
                   </div>
                 )}
@@ -820,6 +925,69 @@ const Dashboard = () => {
             {activeTab === 'bookings' && (
               <div>
                 <h1 className="text-2xl font-semibold text-white mb-6">My Bookings</h1>
+
+                {/* Cart Section */}
+                {cart.length > 0 && (
+                  <div className="mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <ShoppingBag className="w-5 h-5 text-yellow-400" />
+                        Cart ({cart.length})
+                      </h2>
+                    </div>
+                    <div className="space-y-3">
+                      {cart.map((item) => (
+                        <motion.div
+                          key={item.machineId}
+                          layout
+                          className="bg-gray-800 rounded-xl p-3 sm:p-4 border border-gray-700 flex flex-col sm:flex-row sm:items-center gap-3"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <img src={item.machineImage} alt={item.machineName} className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-semibold text-white text-sm sm:text-base truncate">{item.machineName}</h3>
+                              <p className="text-xs sm:text-sm text-gray-400">₹{item.pricePerDay.toLocaleString()}/day</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => updateCartQuantity(item.machineId, item.quantity - 1)}
+                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-gray-600 flex items-center justify-center text-gray-300 hover:bg-gray-700 transition-colors"
+                              >
+                                <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                              </button>
+                              <span className="w-6 sm:w-8 text-center text-white font-medium text-sm">{item.quantity}</span>
+                              <button
+                                onClick={() => updateCartQuantity(item.machineId, item.quantity + 1)}
+                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-gray-600 flex items-center justify-center text-gray-300 hover:bg-gray-700 transition-colors"
+                              >
+                                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                              </button>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-xs sm:text-sm font-semibold text-yellow-400">₹{(item.pricePerDay * item.quantity).toLocaleString()}/day</p>
+                              <button
+                                onClick={() => removeFromCart(item.machineId)}
+                                className="text-xs text-red-400 hover:text-red-300 mt-0.5 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                      <div className="flex justify-between items-center pt-3 border-t border-gray-700 px-1">
+                        <p className="text-sm text-gray-400">Total per day</p>
+                        <p className="text-base sm:text-lg font-bold text-yellow-400">
+                          ₹{cart.reduce((sum, item) => sum + item.pricePerDay * item.quantity, 0).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bookings List */}
                 {bookings.length === 0 ? (
                   <div className="text-center py-12">
                     <ShoppingCart className="w-16 h-16 text-gray-500 mx-auto mb-4" />

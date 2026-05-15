@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CalendarDays, Truck, Wrench, CreditCard, Shield, ArrowLeft, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { X, CalendarDays, Truck, Wrench, CreditCard, Shield, ArrowLeft, ArrowRight, CheckCircle2, Check, Minus, Plus, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import type { Machine } from "@/data/machines";
 
@@ -19,6 +19,9 @@ interface Props {
 const BookingModal = ({ machine, onClose }: Props) => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [bookingData, setBookingData] = useState({
     deliveryMethod: "pickup" as "pickup" | "delivery",
@@ -40,7 +43,7 @@ const BookingModal = ({ machine, onClose }: Props) => {
   ];
 
   const calculateTotal = () => {
-    const baseTotal = machine.pricePerDay * duration;
+    const baseTotal = machine.pricePerDay * duration * quantity;
     const servicesTotal = bookingData.additionalServices.reduce((total, serviceId) => {
       const service = additionalServices.find(s => s.id === serviceId);
       return total + (service?.price || 0);
@@ -64,8 +67,11 @@ const BookingModal = ({ machine, onClose }: Props) => {
     const newBooking = {
       id: Date.now().toString(),
       machineId: machine.id,
+      machineName: machine.name,
+      quantity,
       days: duration,
       total: calculateTotal(),
+      notes: notes.trim(),
       status: 'confirmed',
       createdAt: new Date().toISOString(),
       duration: `${duration} days`,
@@ -156,7 +162,7 @@ const BookingModal = ({ machine, onClose }: Props) => {
               >
                 <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 glass-card rounded-xl sm:rounded-2xl">
                   <img src={machine.image} alt={machine.name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl object-cover" />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-bold text-foreground text-sm sm:text-base truncate">{machine.name}</h3>
                     <p className="text-xs sm:text-sm text-muted-foreground truncate">{machine.location}</p>
                   </div>
@@ -164,20 +170,55 @@ const BookingModal = ({ machine, onClose }: Props) => {
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">For Dates</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="mt-2 w-full justify-start text-left font-normal bg-card/50 border-border/50"
-                        >
-                          <CalendarDays className="mr-2 h-4 w-4" />
-                          {selectedDates.length > 0
-                            ? `${format(selectedDates[0], "MMM d")}${selectedDates.length > 1 ? ` — ${format(selectedDates[selectedDates.length - 1], "MMM d")}` : ''}`
-                            : "Select rental dates"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[calc(100vw-3rem)] sm:w-auto p-0" align="center" sideOffset={8}>
+                    <Label className="text-sm font-medium">Select Rental Dates</Label>
+                    <button
+                      onClick={() => setCalendarOpen(!calendarOpen)}
+                      className={`mt-2 w-full text-left rounded-xl border-2 transition-all group ${
+                        selectedDates.length > 0
+                          ? 'border-primary/40 bg-primary/5'
+                          : 'border-dashed border-primary/30 bg-card/50 hover:border-primary/60 hover:bg-card/80'
+                      } ${calendarOpen ? 'border-primary/60' : ''}`}
+                    >
+                      <div className="flex items-center gap-3 p-4">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+                          <CalendarDays className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {selectedDates.length > 0 ? (
+                            <>
+                              <p className="text-sm font-medium text-foreground">
+                                {format(selectedDates[0], "MMM d")}{selectedDates.length > 1 ? ` — ${format(selectedDates[selectedDates.length - 1], "MMM d")}` : ''}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {selectedDates.length} day{selectedDates.length > 1 ? 's' : ''} selected &middot; {duration} day rental
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm font-medium text-foreground">Choose Dates</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">Tap to select your rental dates</p>
+                            </>
+                          )}
+                        </div>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                          calendarOpen ? 'bg-primary/20 rotate-180' : 'bg-primary/10 group-hover:bg-primary/20'
+                        }`}>
+                          <ArrowRight className="w-4 h-4 text-primary transition-transform" />
+                        </div>
+                      </div>
+                    </button>
+
+                    {calendarOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="mt-2 rounded-xl border border-border/50 overflow-hidden bg-card shadow-xl"
+                      >
+                        <div className="border-b border-border/50 px-4 py-3">
+                          <p className="text-sm font-semibold text-foreground">Select Rental Dates</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Choose one or more days for your rental period</p>
+                        </div>
                         <Calendar
                           mode="multiple"
                           selected={selectedDates}
@@ -187,33 +228,86 @@ const BookingModal = ({ machine, onClose }: Props) => {
                           className="w-full"
                           fromDate={today}
                         />
-                      </PopoverContent>
-                    </Popover>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {selectedDatesSummary} &middot; {
-                        duration === 1 ? '1 day rental' : `${duration} day rental`
-                      }
-                    </p>
+                        {selectedDates.length > 0 && (
+                          <div className="border-t border-border/50 px-4 py-2.5 flex flex-wrap gap-1.5">
+                            {selectedDates.sort((a, b) => a.getTime() - b.getTime()).map((date, i) => (
+                              <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                                {format(date, "d MMM")}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="border-t border-border/50 px-4 py-2 flex justify-end">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setCalendarOpen(false)}
+                            className="text-xs"
+                          >
+                            Done
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                    {selectedDates.length > 0 && (
+                      <div className="mt-2 p-2.5 glass-card rounded-xl flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <p className="text-xs text-muted-foreground">
+                          {selectedDatesSummary} &middot; {
+                            duration === 1 ? '1 day rental' : `${duration} day rental`
+                          }
+                        </p>
+                      </div>
+                    )}
                   </div>
 
-                  {selectedDates.length > 0 && (
-                    <div className="p-3 glass-card rounded-2xl space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">Selected dates:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {selectedDates.sort((a, b) => a.getTime() - b.getTime()).map((date, i) => (
-                          <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                            {format(date, "d MMM")}
-                          </span>
-                        ))}
+                  {/* Quantity */}
+                  <div>
+                    <Label className="text-sm font-medium">Quantity</Label>
+                    <div className="mt-2 flex items-center gap-3">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-10 h-10 rounded-xl border border-border/50 bg-card/50 flex items-center justify-center hover:bg-card/80 transition-colors disabled:opacity-40"
+                        disabled={quantity <= 1}
+                      >
+                        <Minus className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <div className="flex-1 h-10 rounded-xl border border-border/50 bg-card/50 flex items-center justify-center">
+                        <span className="text-lg font-bold text-foreground">{quantity}</span>
                       </div>
+                      <button
+                        onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                        className="w-10 h-10 rounded-xl border border-border/50 bg-card/50 flex items-center justify-center hover:bg-card/80 transition-colors disabled:opacity-40"
+                        disabled={quantity >= 99}
+                      >
+                        <Plus className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <span className="text-xs text-muted-foreground">unit{quantity > 1 ? 's' : ''}</span>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Notes */}
+                  <div>
+                    <Label className="text-sm font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <MessageSquareText className="w-3.5 h-3.5 text-muted-foreground" />
+                        Notes <span className="text-muted-foreground/60 font-normal">(optional)</span>
+                      </span>
+                    </Label>
+                    <Textarea
+                      placeholder="Any special requirements or instructions for your rental..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      className="mt-2 bg-card/50 border-border/50 min-h-[70px] sm:min-h-[80px] text-xs sm:text-sm"
+                    />
+                  </div>
+
                 </div>
 
                 <div className="p-3 sm:p-4 glass-card rounded-xl sm:rounded-2xl space-y-1.5 sm:space-y-3">
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-muted-foreground">Daily Rate</span>
-                    <span className="font-semibold">₹{machine.pricePerDay.toLocaleString()}</span>
+                    <span className="text-muted-foreground">Daily Rate &times; {quantity}</span>
+                    <span className="font-semibold">₹{(machine.pricePerDay * quantity).toLocaleString()}/day</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted-foreground">Duration</span>
@@ -221,7 +315,7 @@ const BookingModal = ({ machine, onClose }: Props) => {
                   </div>
                   <div className="border-t border-border/50 pt-1.5 sm:pt-3 flex justify-between">
                     <span className="font-bold text-foreground text-sm sm:text-base">Subtotal</span>
-                    <span className="font-bold text-primary text-sm sm:text-base">₹{(machine.pricePerDay * duration).toLocaleString()}</span>
+                    <span className="font-bold text-primary text-sm sm:text-base">₹{(machine.pricePerDay * duration * quantity).toLocaleString()}</span>
                   </div>
                 </div>
               </motion.div>
@@ -335,8 +429,8 @@ const BookingModal = ({ machine, onClose }: Props) => {
 
                   <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Equipment ({duration} day{duration > 1 ? 's' : ''})</span>
-                      <span>₹{(machine.pricePerDay * duration).toLocaleString()}</span>
+                      <span className="text-muted-foreground">{machine.name} &times; {quantity} ({duration} day{duration > 1 ? 's' : ''})</span>
+                      <span>₹{(machine.pricePerDay * duration * quantity).toLocaleString()}</span>
                     </div>
 
                     {bookingData.deliveryMethod === "delivery" && (
@@ -392,15 +486,40 @@ const BookingModal = ({ machine, onClose }: Props) => {
                     </RadioGroup>
                   </div>
 
-                  <div className="flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 glass-card rounded-lg sm:rounded-xl">
-                    <Checkbox
-                      id="terms"
-                      checked={bookingData.termsAccepted}
-                      onCheckedChange={(checked) => setBookingData({...bookingData, termsAccepted: !!checked})}
-                    />
-                    <Label htmlFor="terms" className="text-xs sm:text-sm cursor-pointer">
-                      I agree to the <span className="text-primary underline">Terms & Conditions</span> and <span className="text-primary underline">Rental Agreement</span>
-                    </Label>
+                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                    bookingData.termsAccepted
+                      ? 'border-emerald-500/60 bg-emerald-500/10'
+                      : 'border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50'
+                  }`}
+                    onClick={() => setBookingData({...bookingData, termsAccepted: !bookingData.termsAccepted})}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-0.5 w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                        bookingData.termsAccepted
+                          ? 'bg-gradient-to-br from-emerald-400 to-green-600 shadow-md shadow-emerald-500/30'
+                          : 'bg-card border-2 border-emerald-400/40'
+                      }`}>
+                        {bookingData.termsAccepted && <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />}
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base font-semibold text-foreground">
+                          Agree to Terms & Conditions
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed">
+                          By accepting, you confirm that you have read and agree to our{' '}
+                          <span className="text-primary font-medium underline">Terms & Conditions</span>{' '}
+                          and{' '}
+                          <span className="text-primary font-medium underline">Rental Agreement</span>.
+                          This is required to proceed with your booking.
+                        </p>
+                        {!bookingData.termsAccepted && (
+                          <p className="text-xs text-emerald-500/70 mt-2 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/70" />
+                            Accept the terms to confirm your booking
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
